@@ -6,19 +6,19 @@ import BQ24045DSQR from "bq24045dsqr/elec/src/bq24045dsqr.ato"
 
 
 module PowerSupply:
-    power_in = new Power
-    power_out = new Power
+    power5v = new Power
+    power3v3 = new Power
 
     battery = new Battery
     charger = new Charger
     buckboost = new BuckBoost
     ldo = new LDO
 
-    power_in ~ charger.power_in
+    power5v ~ charger.power_in
     charger.power_batt ~ battery.power
     battery.power ~ buckboost.power_in
     buckboost.power_out ~ ldo.power_in
-    ldo.power_out ~ power_out
+    ldo.power_out ~ power3v3
 
 
 module Battery:

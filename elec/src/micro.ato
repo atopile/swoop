@@ -2,6 +2,7 @@ import Power from "generics/interfaces.ato"
 import I2C from "generics/interfaces.ato"
 import UART from "generics/interfaces.ato"
 import Pair from "generics/interfaces.ato"
+import USB2 from "generics/interfaces.ato"
 
 import RP2040Kit from "rp2040/RP2040Kit.ato"
 
@@ -10,6 +11,12 @@ module Micro:
     i2c = new I2C
     uart = new UART
     interrupt = new Pair
+    usb2 = new USB2
+    power_btn = new Pair
+    menu_btn_1 = new Pair
+    menu_btn_2 = new Pair
+    menu_btn_3 = new Pair
+    led_dout = new Pair
 
     # pick a micro
     micro = new RP2040Kit
@@ -20,3 +27,16 @@ module Micro:
     uart ~ micro.uart
     interrupt.io ~ micro.gpio0
     interrupt.gnd ~ power.gnd
+    usb2 ~ micro.usb2
+    power_btn.io ~ micro.gpio1
+    menu_btn_1.io ~ micro.gpio2
+    menu_btn_2.io ~ micro.gpio3
+    menu_btn_3.io ~ micro.gpio4
+    led_dout.io ~ micro.gpio5
+
+    # can delete if micro had Pairs instead of signals
+    power_btn.gnd ~ power.gnd
+    menu_btn_1.gnd ~ power.gnd
+    menu_btn_2.gnd ~ power.gnd
+    menu_btn_3.gnd ~ power.gnd
+    led_dout.gnd ~ power.gnd

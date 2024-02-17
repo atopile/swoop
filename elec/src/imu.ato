@@ -11,23 +11,19 @@ module IMU:
     i2c = new I2C
     interrupt = new Pair
 
-    # Candidate 1: 9-DOF Absolute Orientation IMU - BNO055/BNO086
-    # Kinda nice not to have to worry about sensor fusion
-    # ADDRESS: 0x28
-    imu = new BNO055
-    power ~ imu.power
-    i2c ~ imu.i2c
-
-    # Candidate 2: 6-DOF + 3 dof magnetometer
-
-    # Bosch BMI088 6-axis accelerometer and gyroscope
-    # ADDRESS: 0x18
+    bno055 = new BNO055
     bmi088 = new BMI088
-    power ~ bmi088.power
-    i2c ~ bmi088.i2c
-
-    # STMicroelectronics LIS3MDLTR magnetometer
-    # ADDRESS: 0x1E
     lis3mdltr = new LIS3MDLTR
+
+    # Power
+    power ~ bno055.power
+    power ~ bmi088.power
     power ~ lis3mdltr.power
+
+    # I2C
+    i2c ~ bno055.i2c
+    i2c ~ bmi088.i2c
     i2c ~ lis3mdltr.i2c
+
+    # Interrupt
+    interrupt ~ bno055.interrupt

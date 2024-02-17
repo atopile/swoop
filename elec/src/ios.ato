@@ -4,8 +4,8 @@ import USB2 from "generics/interfaces.ato"
 import Pair from "generics/interfaces.ato"
 import ButtonPullup from "generics/buttons.ato"
 import ButtonSKRPACE010 from "generics/buttons.ato"
-import SK6805EC20 from "sk6805-ec/sk6805-ec.ato"
-import AH3772SA7 from "ah3772-sa-7/ah3772-sa-7.ato"
+import SK6805EC20 from "sk6805-ec20/elec/src/sk6805-ec20.ato"
+import AH3772SA7 from "ah3772-sa-7/elec/src/AH372-SA-7.ato"
 
 
 module SKRPACEPullupBtn from ButtonPullup:
@@ -47,6 +47,10 @@ module IOs:
     power3v3 ~ led1.power
     power3v3 ~ led2.power
     power3v3 ~ led3.power
+    power3v3 ~ power_button.power
+    power3v3 ~ menu_button_1.power
+    power3v3 ~ menu_button_2.power
+    power3v3 ~ menu_button_3.power
     power3v3 ~ hall_effect.power
 
     # Connect the LEDs
@@ -55,12 +59,12 @@ module IOs:
     led2.dout ~ led3.din
 
     # Connect the buttons
-    power_btn ~ power_button.btn
-    menu_btn_1 ~ menu_button_1.btn
-    menu_btn_2 ~ menu_button_2.btn
-    menu_btn_3 ~ menu_button_3.btn
+    power_btn ~ power_button.output
+    menu_btn_1 ~ menu_button_1.output
+    menu_btn_2 ~ menu_button_2.output
+    menu_btn_3 ~ menu_button_3.output
 
     # Connect Devices
     usb2 ~ usbc_connector.usb2
-    hall_sense ~ hall_effect.sense
+    hall_sense ~ hall_effect.output
 

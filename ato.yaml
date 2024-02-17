@@ -13,5 +13,6 @@ dependencies:
 - bq24045dsqr
 
 - usb-connectors ^v2.0.1
+- saleae-header ^v0.0.2
 services:
   components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc

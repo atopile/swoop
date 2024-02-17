@@ -15,7 +15,7 @@ module Swoop:
 
     # Create modules
     micro = new Micro
-    powerSupply = new PowerSupply
+    power_supply = new PowerSupply
     imu = new IMU
     radio = new Radio
     ios = new IOs
@@ -28,15 +28,15 @@ module Swoop:
     micro.interrupt ~ imu.interrupt
 
     # GPIO
-    micro.led_din ~ ios.led_din
+    micro.led_dout ~ ios.led_din
     micro.power_btn ~ ios.power_btn
     micro.menu_btn_1 ~ ios.menu_btn_1
     micro.menu_btn_2 ~ ios.menu_btn_2
     micro.menu_btn_3 ~ ios.menu_btn_3
 
     # Regultators
-    ios.power5v ~ powerSupply.power_in
-    powerSupply.power_out ~ power3v3
+    ios.power5v ~ power_supply.power5v
+    power_supply.power3v3 ~ power3v3
 
     # power connections
     power3v3 ~ imu.power

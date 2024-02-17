@@ -1,0 +1,30 @@
+import Swoop from "swoop.ato"
+import SaleaeHeader from "saleae-header/saleae-header.ato"
+
+module Debug:
+    """
+    Swoop debug build with test points and saleae headers
+    """
+    swoop = new Swoop
+
+
+    saleae1 = new SaleaeHeader
+    saleae2 = new SaleaeHeader
+    saleae3 = new SaleaeHeader
+    saleae4 = new SaleaeHeader
+
+    # I2c: ch0 = SDA, ch1 = SCL
+    # UART: ch2 = TX, ch3 = RX
+
+    swoop.radio.uart ~ saleae1.uart
+    swoop.imu.i2c ~ saleae1.i2c
+    swoop.imu.interrupt ~ saleae2.ch0
+    swoop.ios.led_din ~ saleae2.ch1
+    swoop.ios.usb2 ~ saleae2.usb2
+    swoop.ios.power_btn ~ saleae3.ch0
+    swoop.ios.menu_btn_1 ~ saleae3.ch1
+    swoop.ios.menu_btn_2 ~ saleae3.ch2
+    swoop.ios.menu_btn_3 ~ saleae3.ch3
+    swoop.power_supply.power3v3 ~ saleae4.ch0
+    swoop.power_supply.power5v ~ saleae4.ch1
+    swoop.power_supply.battery.power ~ saleae4.ch2
