@@ -7,6 +7,10 @@ import IOs from "ios.ato"
 import Power from "generics/interfaces.ato"
 
 module Swoop:
+    """
+    Swoop is an opensource motion controller for FPV drones.
+    Compatable with ExpressLRS.
+    """
     power3v3 = new Power
 
     # Create modules
@@ -16,21 +20,25 @@ module Swoop:
     radio = new Radio
     ios = new IOs
 
-    # Power connections
+    # Comms
+    micro.usb2 ~ ios.usb2
+    micro.power ~ power3v3
+    micro.uart ~ radio.uart
+    micro.i2c ~ imu.i2c
+    micro.interrupt ~ imu.interrupt
+
+    # GPIO
+    micro.led_din ~ ios.led_din
+    micro.power_btn ~ ios.power_btn
+    micro.menu_btn_1 ~ ios.menu_btn_1
+    micro.menu_btn_2 ~ ios.menu_btn_2
+    micro.menu_btn_3 ~ ios.menu_btn_3
+
+    # Regultators
     ios.power5v ~ powerSupply.power_in
     powerSupply.power_out ~ power3v3
 
-    micro.power ~ power3v3
-
-    # IMU
-    imu.power ~ power3v3
-    imu.i2c ~ micro.i2c
-    imu.interrupt ~ micro.interrupt
-
-    # Radio
-    radio.power ~ power3v3
-    radio.uart ~ micro.uart
-
-    # IOs
-    ios.power3v3 ~ power3v3
-    # a few buttons and some status leds
+    # power connections
+    power3v3 ~ imu.power
+    power3v3 ~ radio.power
+    power3v3 ~ ios.power3v3
