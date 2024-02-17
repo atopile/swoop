@@ -1,0 +1,6 @@
+import Power from "generics/interfaces.ato"
+import UART from "generics/interfaces.ato"
+
+module Radio:
+    power = new Power
+    uart = new UART

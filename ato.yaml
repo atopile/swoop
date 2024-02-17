@@ -4,3 +4,12 @@ builds:
     entry: elec/src/swoop.ato:Swoop
 dependencies:
 - generics
+- rp2040 ^v4.0.1
+- bno055
+- batteries ^v3.0.0
+- ams1117-33
+- bq24045dsqr
+
+- usb-connectors ^v2.0.1
+services:
+  components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc

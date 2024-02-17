@@ -1,2 +1,36 @@
+import Micro from "micro.ato"
+import PowerSupply from "power-supply.ato"
+import IMU from "imu.ato"
+import Radio from "radio.ato"
+import IOs from "ios.ato"
+
+import Power from "generics/interfaces.ato"
+
 module Swoop:
-    signal gnd
+    power3v3 = new Power
+
+    # Create modules
+    micro = new Micro
+    powerSupply = new PowerSupply
+    imu = new IMU
+    radio = new Radio
+    ios = new IOs
+
+    # Power connections
+    ios.power5v ~ powerSupply.power_in
+    powerSupply.power_out ~ power3v3
+
+    micro.power ~ power3v3
+
+    # IMU
+    imu.power ~ power3v3
+    imu.i2c ~ micro.i2c
+    imu.interrupt ~ micro.interrupt
+
+    # Radio
+    radio.power ~ power3v3
+    radio.uart ~ micro.uart
+
+    # IOs
+    ios.power3v3 ~ power3v3
+    # a few buttons and some status leds

@@ -1,0 +1,56 @@
+import Power from "generics/interfaces.ato"
+import BatteryJST from "batteries/batteries.ato"
+import AMS111733 from "ams1117-33/elec/src/ams1117-33.ato"
+import TPS63020DSJR from "tps63020dsjr/elec/src/tps63020dsjr.ato"
+import BQ24045DSQR from "bq24045dsqr/elec/src/bq24045dsqr.ato"
+
+
+module PowerSupply:
+    power_in = new Power
+    power_out = new Power
+
+    battery = new Battery
+    charger = new Charger
+    buckboost = new BuckBoost
+    ldo = new LDO
+
+    power_in ~ charger.power_in
+    charger.power_batt ~ battery.power
+    battery.power ~ buckboost.power_in
+    buckboost.power_out ~ ldo.power_in
+    ldo.power_out ~ power_out
+
+
+module Battery:
+    power = new Power
+
+    # Battery connector
+    batt_jst = new BatteryJST
+    power ~ batt_jst.power
+
+module Charger:
+    power_in = new Power
+    power_batt = new Power
+
+    bq24045 = new BQ24045DSQR
+    power_in ~ bq24045.power_in
+    power_batt ~ bq24045.power_batt
+
+module BuckBoost:
+    power_in = new Power
+    power_out = new Power
+
+    # 2A output buck-boost
+    tps_buck_boost = new TPS63020DSJR
+    tps_buck_boost.power_out.voltage = 3.3V
+    power_in ~ tps_buck_boost.power_in
+    power_out ~ tps_buck_boost.power_out
+
+module LDO:
+    power_in = new Power
+    power_out = new Power
+
+    # 1A fixed 3v3 LDO
+    ams1117_33 = new AMS111733
+    power_in ~ ams1117_33.power_in
+    power_out ~ ams1117_33.power_out

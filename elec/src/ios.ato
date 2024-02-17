@@ -1,0 +1,25 @@
+import USBCConn from "usb-connectors/usb-connectors.ato"
+import Power from "generics/interfaces.ato"
+import USB2 from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+import ButtonPullup from "generics/buttons.ato"
+import ButtonSKRPACE010 from "generics/buttons.ato"
+
+
+module SKRPACEPullupBtn from ButtonPullup:
+    btn -> ButtonSKRPACE010
+
+
+module IOs:
+    power3v3 = new Power
+    power5v = new Power
+    usb2 = new USB2
+
+    usbc_connector = new USBCConn
+    power5v ~ usbc_connector.power
+    usb2 ~ usbc_connector.usb2
+
+    power_button = new SKRPACEPullupBtn
+    menu_button_1 = new SKRPACEPullupBtn
+    menu_button_2 = new SKRPACEPullupBtn
+    menu_button_3 = new SKRPACEPullupBtn
