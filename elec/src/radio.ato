@@ -1,6 +1,31 @@
+import STM32L432KBU6 from "stm32l432kbu6/elec/src/stm32l432kbu6.ato"
+import SX1280 from "sx1280imltrt/elec/src/sx1280imltrt.ato"
+import JTAG_10PIN from "programming-headers/elec/src/programming-headers.ato"
+
 import Power from "generics/interfaces.ato"
 import UART from "generics/interfaces.ato"
 
 module Radio:
-    power = new Power
+    power  = new Power
     uart = new UART
+    micro = new STM32L432KBU6
+    radio = new SX1280
+
+    # optional JTAG header
+    jtag_header = new JTAG_10PIN
+
+    # external connections
+    power ~ micro.power
+    power ~ radio.power
+    uart ~ micro.uart
+
+    # internal connections
+    radio.spi ~ micro.spi
+    radio.data1 ~ micro.PA10
+    radio.data2 ~ micro.PA9
+    radio.data3 ~ micro.PA8
+    radio.busy ~ micro.PA11
+    radio.reset ~ micro.PB4
+
+    # optional JTAG header
+    jtag_header.jtag ~ micro.jtag

@@ -14,5 +14,8 @@ dependencies:
 
 - usb-connectors ^v2.0.1
 - saleae-header ^v0.0.2
+- stm32l432kbu6
+- sx1280imltrt
+- programming-headers ^v0.0.1
 services:
   components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc
