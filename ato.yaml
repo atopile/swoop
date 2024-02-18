@@ -7,7 +7,7 @@ builds:
 dependencies:
 - ams1117-33
 - ah3772-sa-7
-- batteries ^v3.0.
+- batteries
 - bmi088
 - bno055
 - bq24045dsqr
