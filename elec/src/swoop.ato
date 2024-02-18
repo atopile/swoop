@@ -25,6 +25,7 @@ module Swoop:
     micro.power ~ power3v3
     micro.uart ~ radio.uart
     micro.i2c ~ imu.i2c
+    micro.i2c ~ ios.i2c
     micro.interrupt ~ imu.interrupt
 
     # GPIO

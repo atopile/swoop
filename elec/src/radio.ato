@@ -5,6 +5,7 @@ import JTAG_10PIN from "programming-headers/elec/src/programming-headers.ato"
 import Power from "generics/interfaces.ato"
 import UART from "generics/interfaces.ato"
 
+
 module Radio:
     power  = new Power
     uart = new UART
@@ -17,7 +18,10 @@ module Radio:
     # external connections
     power ~ micro.power
     power ~ radio.power
-    uart ~ micro.uart
+    # Uart connections need to be crossed (need a better way to do this )
+    uart.tx ~ micro.uart.rx
+    uart.rx ~ micro.uart.tx
+    power.gnd ~ uart.gnd
 
     # internal connections
     radio.spi ~ micro.spi

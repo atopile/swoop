@@ -3,10 +3,12 @@ import Power from "generics/interfaces.ato"
 import USB2 from "generics/interfaces.ato"
 import I2C from "generics/interfaces.ato"
 import Pair from "generics/interfaces.ato"
+import DiffPair from "generics/interfaces.ato"
 import ButtonPullup from "generics/buttons.ato"
 import ButtonSKRPACE010 from "generics/buttons.ato"
 import SK6805EC20 from "sk6805-ec20/elec/src/sk6805-ec20.ato"
 import AH3772SA7 from "ah3772-sa-7/elec/src/AH372-SA-7.ato"
+import DRV2605 from "drv2605ldgsr/elec/src/drv2605ldgsr.ato"
 
 
 module SKRPACEPullupBtn from ButtonPullup:
@@ -33,7 +35,7 @@ module IOs:
     menu_btn_3 = new Pair
 
 
-    # LEDs
+    # Submodules
     usbc_connector = new USBCConn
     led1 = new SK6805EC20
     led2 = new SK6805EC20
@@ -43,6 +45,8 @@ module IOs:
     menu_button_2 = new SKRPACEPullupBtn
     menu_button_3 = new SKRPACEPullupBtn
     hall_effect = new AH3772SA7
+    haptic_driver = new DRV2605
+    haptic_connector = new DB125_2_54_2P_GN
 
     # Connect power
     power5v ~ usbc_connector.power
@@ -54,11 +58,15 @@ module IOs:
     power3v3 ~ menu_button_2.power
     power3v3 ~ menu_button_3.power
     power3v3 ~ hall_effect.power
+    power3v3 ~ haptic_driver.power
 
     # Connect the LEDs
     led_din ~ led1.din
     led1.dout ~ led2.din
     led2.dout ~ led3.din
+
+    # Connect the I2C bus
+    i2c ~ haptic_driver.i2c
 
     # Connect the buttons
     power_btn ~ power_button.output
@@ -69,4 +77,19 @@ module IOs:
     # Connect Devices
     usb2 ~ usbc_connector.usb2
     hall_sense ~ hall_effect.output
+
+    # Connect the haptic driver
+    haptic_driver.output ~ haptic_connector.input
+
+component DB125_2_54_2P_GN:
+    # component DB125-2.54-2P-GN
+    footprint = "CONN-TH_DB125-2.54-2P-GN"
+    lcsc_id = "C918120"
+    mpn = "C918120"
+    # pins
+
+    input = new DiffPair
+    input.p ~ pin 1
+    input.n ~ pin 2
+
 

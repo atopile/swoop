@@ -12,6 +12,8 @@ module Debug:
     saleae2 = new SaleaeHeader
     saleae3 = new SaleaeHeader
     saleae4 = new SaleaeHeader
+    saleae5 = new SaleaeHeader
+    saleae6 = new SaleaeHeader
 
     # I2c: ch0 = SDA, ch1 = SCL
     # UART: ch2 = TX, ch3 = RX
@@ -19,12 +21,20 @@ module Debug:
     swoop.radio.uart ~ saleae1.uart
     swoop.imu.i2c ~ saleae1.i2c
     swoop.imu.interrupt ~ saleae2.ch0
+
     swoop.ios.led_din ~ saleae2.ch1
     swoop.ios.usb2 ~ saleae2.usb2
     swoop.ios.power_btn ~ saleae3.ch0
     swoop.ios.menu_btn_1 ~ saleae3.ch1
     swoop.ios.menu_btn_2 ~ saleae3.ch2
     swoop.ios.menu_btn_3 ~ saleae3.ch3
+
     swoop.power_supply.power3v3 ~ saleae4.ch0
     swoop.power_supply.power5v ~ saleae4.ch1
     swoop.power_supply.battery.power ~ saleae4.ch2
+
+    swoop.radio.radio.spi ~ saleae5.spi
+    swoop.radio.radio.data1 ~ saleae6.ch0
+    swoop.radio.radio.data2 ~ saleae6.ch1
+    swoop.radio.radio.data3 ~ saleae6.ch2
+    swoop.radio.radio.busy ~ saleae6.ch3
