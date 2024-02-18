@@ -13,7 +13,7 @@ dependencies:
 - bq24045dsqr
 - drv2605ldgsr
 - generics
-- lis2dh12tr
+- lis3mdltr
 - programming-headers
 - qwiic-connectors
 - rp2040
