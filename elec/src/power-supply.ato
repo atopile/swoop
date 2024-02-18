@@ -3,7 +3,7 @@ import BatteryJST from "batteries/batteries.ato"
 import AMS111733 from "ams1117-33/elec/src/ams1117-33.ato"
 import TPS63020DSJR from "tps63020dsjr/elec/src/tps63020dsjr.ato"
 import BQ24045DSQR from "bq24045dsqr/elec/src/bq24045dsqr.ato"
-
+import Diode from "generics/diodes.ato"
 
 module PowerSupply:
     power5v = new Power
@@ -14,12 +14,36 @@ module PowerSupply:
     buckboost = new BuckBoost
     ldo = new LDO
 
+    # add in a diode or between the battery and buck boost (diode just on 5V side)
+    power_or = new DiodeOrUSB
+    power5v ~ power_or.power_usb
+    power_or.power_batt ~ battery.power
+
     power5v ~ charger.power_in
     charger.power_batt ~ battery.power
-    battery.power ~ buckboost.power_in
+
+    power_or.power_out ~ buckboost.power_in
     buckboost.power_out ~ ldo.power_in
     ldo.power_out ~ power3v3
 
+
+
+module DiodeOrUSB:
+    """
+    This module is used to select between the USB power and the battery power.
+    USB power is diode or'd with the battery power, there is no diode between the
+    battery and the output for efficiency.
+    """
+    power_usb = new Power
+    power_batt = new Power
+    power_out = new Power
+
+    diode = new Diode
+    power_usb.vcc ~ diode.anode
+    diode.cathode ~ power_out.vcc
+    power_batt ~ power_out
+
+    diode -> SS14
 
 module Battery:
     power = new Power
@@ -42,7 +66,9 @@ module BuckBoost:
 
     # 2A output buck-boost
     tps_buck_boost = new TPS63020DSJR
-    tps_buck_boost.power_out.voltage = 3.3V
+    # tps_buck_boost.power_out.voltage = 3.6V
+    # manually set to 3.6V VOUT (no equations, yet)
+    tps_buck_boost.feedback_div.r_top.value = 1.1Mohm +/- 5%
     power_in ~ tps_buck_boost.power_in
     power_out ~ tps_buck_boost.power_out
 
@@ -54,3 +80,12 @@ module LDO:
     ams1117_33 = new AMS111733
     power_in ~ ams1117_33.power_in
     power_out ~ ams1117_33.power_out
+
+component SS14 from Diode:
+    # component SS14
+    footprint = "SMA_L4.2-W2.6-LS5.3-RD"
+    lcsc_id = "C2480"
+    mpn = "C2480"
+    # pins
+    anode ~ pin 2
+    cathode ~ pin 1

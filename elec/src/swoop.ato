@@ -34,6 +34,7 @@ module Swoop:
     micro.menu_btn_1 ~ ios.menu_btn_1
     micro.menu_btn_2 ~ ios.menu_btn_2
     micro.menu_btn_3 ~ ios.menu_btn_3
+    micro.hall_sense ~ ios.hall_sense
 
     # Regultators
     ios.power5v ~ power_supply.power5v

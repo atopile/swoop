@@ -1,5 +1,7 @@
 import Swoop from "swoop.ato"
 import SaleaeHeader from "saleae-header/saleae-header.ato"
+import Pair from "generics/interfaces.ato"
+import Power from "generics/interfaces.ato"
 
 module Debug:
     """
@@ -14,6 +16,8 @@ module Debug:
     saleae4 = new SaleaeHeader
     saleae5 = new SaleaeHeader
     saleae6 = new SaleaeHeader
+
+    pot = new _RK09K1130AJ3
 
     # I2c: ch0 = SDA, ch1 = SCL
     # UART: ch2 = TX, ch3 = RX
@@ -38,3 +42,20 @@ module Debug:
     swoop.radio.radio.data2 ~ saleae6.ch1
     swoop.radio.radio.data3 ~ saleae6.ch2
     swoop.radio.radio.busy ~ saleae6.ch3
+
+    swoop.power3v3 ~ pot.power
+    swoop.micro.micro.gpio23 ~ pot.output.io
+
+component _RK09K1130AJ3:
+    # component RK09K1130AJ3
+    footprint = "RES-ADJ-TH_RK09K1130AJ3"
+    lcsc_id = "C388854"
+    mpn = "C388854"
+    # pins
+    output = new Pair
+    power = new Power
+    power.gnd ~ pin 1
+    output.io ~ pin 2
+    power.vcc ~ pin 3
+
+    power.gnd ~ output.gnd

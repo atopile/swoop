@@ -3,8 +3,17 @@ import I2C from "generics/interfaces.ato"
 import UART from "generics/interfaces.ato"
 import Pair from "generics/interfaces.ato"
 import USB2 from "generics/interfaces.ato"
+import I2CPullup from "generics/resistors.ato"
+import ButtonSKRPACE010 from "generics/buttons.ato"
+import QwiicConnector from "qwiic-connectors/elec/src/qwiic-connectors.ato"
 
 import RP2040Kit from "rp2040/RP2040Kit.ato"
+
+# TODO: review gpio assignments
+# TODO: review power
+# TODO: review uart
+# TODO: review usb2
+# TODO: add potentiometer (backup trigger sensor)
 
 module Micro:
     power = new Power
@@ -17,13 +26,24 @@ module Micro:
     menu_btn_2 = new Pair
     menu_btn_3 = new Pair
     led_dout = new Pair
+    hall_sense = new Pair
+    i2c_pullup = new I2CPullup
+    qwiic = new QwiicConnector
 
     # pick a micro
     micro = new RP2040Kit
 
+    # pick buttons
+    micro.reset_btn.btn -> ButtonSKRPACE010
+    micro.boot_btn.btn -> ButtonSKRPACE010
+
     # map module to ic
     power ~ micro.power
+    power ~ i2c_pullup.power
+    power ~ qwiic.power
     i2c ~ micro.i2c
+    i2c ~ qwiic.i2c
+    i2c ~ i2c_pullup.i2c
     uart ~ micro.uart
     interrupt.io ~ micro.gpio0
     interrupt.gnd ~ power.gnd
@@ -33,6 +53,7 @@ module Micro:
     menu_btn_2.io ~ micro.gpio3
     menu_btn_3.io ~ micro.gpio4
     led_dout.io ~ micro.gpio5
+    hall_sense.io ~ micro.gpio26_a0
 
     # can delete if micro had Pairs instead of signals
     power_btn.gnd ~ power.gnd

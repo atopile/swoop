@@ -29,11 +29,11 @@ module IOs:
     i2c = new I2C
     led_din = new Pair
     hall_sense = new Pair
+    pot_output = new Pair
     power_btn = new Pair
     menu_btn_1 = new Pair
     menu_btn_2 = new Pair
     menu_btn_3 = new Pair
-
 
     # Submodules
     usbc_connector = new USBCConn
