@@ -10,7 +10,6 @@ import QwiicConnector from "qwiic-connectors/elec/src/qwiic-connectors.ato"
 import RP2040Kit from "rp2040/RP2040Kit.ato"
 
 # TODO: review gpio assignments
-# TODO: review power
 # TODO: review uart
 # TODO: review usb2
 # TODO: add potentiometer (backup trigger sensor)
