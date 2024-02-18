@@ -5,17 +5,25 @@ builds:
   debug:
     entry: elec/src/debug.ato:Debug
 dependencies:
-- generics
-- rp2040 ^v4.0.1
-- bno055
-- batteries ^v3.0.0
 - ams1117-33
+- ah3772-sa-7
+- batteries ^v3.0.
+- bmi088
+- bno055
 - bq24045dsqr
-
-- usb-connectors ^v2.0.1
+- drv2605ldgsr
+- generics
+- lis2dh12tr
+- programming-headers
+- qwiic-connectors
+- rp2040
 - saleae-header ^v0.0.2
+- sk6805-ec20
 - stm32l432kbu6
 - sx1280imltrt
-- programming-headers ^v0.0.1
+- tps63020dsjr
+- usb-connectors ^v2.0.1
+
+
 services:
   components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc
