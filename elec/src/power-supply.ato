@@ -14,6 +14,11 @@ module PowerSupply:
     buckboost = new BuckBoost
     ldo = new LDO
 
+    charger.bq24045.charge_current = 500mA +/- 10%
+
+    buckboost.tps_buck_boost.v_in = 2.5V to 4.2V
+    buckboost.tps_buck_boost.v_out = 3V to 3.4V
+    buckboost.tps_buck_boost.i_q = 1uA to 5uA
     # add in a diode or between the battery and buck boost (diode just on 5V side)
     power_or = new DiodeOrUSB
     power5v ~ power_or.power_usb
@@ -25,7 +30,6 @@ module PowerSupply:
     power_or.power_out ~ buckboost.power_in
     buckboost.power_out ~ ldo.power_in
     ldo.power_out ~ power3v3
-
 
 
 module DiodeOrUSB:
@@ -68,7 +72,7 @@ module BuckBoost:
     tps_buck_boost = new TPS63020DSJR
     # tps_buck_boost.power_out.voltage = 3.6V
     # manually set to 3.6V VOUT (no equations, yet)
-    tps_buck_boost.feedback_div.r_top.value = 1.1Mohm +/- 5%
+    # tps_buck_boost.feedback_div.r_top.value = 1.1Mohm +/- 5%
     power_in ~ tps_buck_boost.power_in
     power_out ~ tps_buck_boost.power_out
 

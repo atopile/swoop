@@ -2,12 +2,31 @@ import Swoop from "swoop.ato"
 import SaleaeHeader from "saleae-header/saleae-header.ato"
 import Pair from "generics/interfaces.ato"
 import Power from "generics/interfaces.ato"
+import VDiv from "generics/vdivs.ato"
+from "generics/leds.ato" import LEDIndicatorRed, LEDIndicatorGreen, LEDIndicatorBlue
 
 module Debug:
     """
     Swoop debug build with test points and saleae headers
     """
     swoop = new Swoop
+
+    battery_indicator = new LEDIndicatorRed
+    power5V_indicator = new LEDIndicatorGreen
+    power3V3_indicator = new LEDIndicatorBlue
+
+    # Connect LEDs
+    swoop.power_supply.power3v3 ~ power3V3_indicator.power
+    swoop.power_supply.power5v ~ power5V_indicator.power
+    swoop.power_supply.battery.power ~ battery_indicator.power
+
+    # Configure leds
+    power3V3_indicator.v_in = 3.3V +/- 5%
+    power3V3_indicator.current = 1mA to 3mA
+    power5V_indicator.v_in = 5V +/- 5%
+    power5V_indicator.current = 1mA to 3mA
+    battery_indicator.v_in = 4.2V +/- 5%
+    battery_indicator.current = 1mA to 3mA
 
 
     saleae1 = new SaleaeHeader
@@ -59,3 +78,4 @@ component _RK09K1130AJ3:
     power.vcc ~ pin 3
 
     power.gnd ~ output.gnd
+

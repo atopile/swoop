@@ -91,5 +91,3 @@ component DB125_2_54_2P_GN:
     input = new DiffPair
     input.p ~ pin 1
     input.n ~ pin 2
-
-

@@ -1,13 +1,8 @@
-import Power from "generics/interfaces.ato"
-import I2C from "generics/interfaces.ato"
-import UART from "generics/interfaces.ato"
-import Pair from "generics/interfaces.ato"
-import USB2 from "generics/interfaces.ato"
-import I2CPullup from "generics/resistors.ato"
-import ButtonSKRPACE010 from "generics/buttons.ato"
-import QwiicConnector from "qwiic-connectors/elec/src/qwiic-connectors.ato"
-
-import RP2040Kit from "rp2040/RP2040Kit.ato"
+from "generics/interfaces.ato" import Power, I2C, UART, Pair, USB2
+from "generics/resistors.ato" import I2CPullup
+from "generics/buttons.ato" import ButtonSKRPACE010
+from "qwiic-connectors/elec/src/qwiic-connectors.ato" import QwiicConnector
+from "rp2040/RP2040Kit.ato" import RP2040Kit
 
 # TODO: review gpio assignments
 # TODO: review uart
