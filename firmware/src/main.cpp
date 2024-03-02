@@ -55,7 +55,7 @@ void setup(void)
 	// Try to initialize!
 	Wire.setSDA(20);
 	Wire.setSCL(21);
-	while (!bno08x.begin_I2C(0x4B))
+	while (!bno08x.begin_I2C(0x4A))
 	{
 		Serial.println("Failed to find BNO08x chip");
 		delay(1000);
