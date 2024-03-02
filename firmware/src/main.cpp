@@ -3,100 +3,133 @@
 #include "BMI088.h"
 #include "LIS3MDL.h"
 #include "SensorFusion.h"
+// This demo explores two reports (SH2_ARVR_STABILIZED_RV and SH2_GYRO_INTEGRATED_RV) both can be used to give
+// quartenion and euler (yaw, pitch roll) angles.  Toggle the FAST_MODE define to see other report.
+// Note sensorValue.status gives calibration accuracy (which improves over time)
+#include <Adafruit_BNO08x.h>
 
-LIS3MDL mag;
-Bmi088 bmi(Wire, 0x18, 0x68);
+// #define FAST_MODE
 
-SF fusion;
-float gx, gy, gz, ax, ay, az, mx, my, mz;
-float pitch, roll, yaw;
-float deltat;
-float T;
+// For SPI mode, we also need a RESET
+// #define BNO08X_RESET 5
+// but not for I2C or UART
+#define BNO08X_RESET -1
 
-char report[80];
-
-void setup()
+struct euler_t
 {
+	float yaw;
+	float pitch;
+	float roll;
+} ypr;
+
+Adafruit_BNO08x bno08x(BNO08X_RESET);
+sh2_SensorValue_t sensorValue;
+
+#ifdef FAST_MODE
+// Top frequency is reported to be 1000Hz (but freq is somewhat variable)
+sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
+long reportIntervalUs = 2000;
+#else
+// Top frequency is about 250Hz but this report is more accurate
+sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
+long reportIntervalUs = 5000;
+#endif
+void setReports(sh2_SensorId_t reportType, long report_interval)
+{
+	Serial.println("Setting desired reports");
+	if (!bno08x.enableReport(reportType, report_interval))
+	{
+		Serial.println("Could not enable stabilized remote vector");
+	}
+}
+
+void setup(void)
+{
+
 	Serial.begin(115200);
 	while (!Serial)
-		;
-	Serial.println("Serial started!");
+		delay(10); // will pause Zero, Leonardo, etc until serial console opens
 
-	// Configure the i2c bus (Wire) to use:
-	//  - i2c.sda ~ gpio20
-	//  - i2c.scl ~ gpio21
+	Serial.println("Adafruit BNO08x test!");
+
+	// Try to initialize!
 	Wire.setSDA(20);
 	Wire.setSCL(21);
-	Wire.begin();
-	Serial.println("I2C started!");
-
-	if (!mag.init())
+	while (!bno08x.begin_I2C(0x4B))
 	{
-		while (1)
-		{
-			Serial.println("Failed to detect and initialize magnetometer!");
-			delay(1000);
-		}
+		Serial.println("Failed to find BNO08x chip");
+		delay(1000);
 	}
-	mag.enableDefault();
-	Serial.println("Magnetometer started!");
+	Serial.println("BNO08x Found!");
 
-	// Start the BNO055 sensor
-	delay(1000);
-	int bmi_status = bmi.begin();
-	if (bmi_status < 1)
+	setReports(reportType, reportIntervalUs);
+
+	Serial.println("Reading events");
+	delay(100);
+}
+
+void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t *ypr, bool degrees = false)
+{
+
+	float sqr = sq(qr);
+	float sqi = sq(qi);
+	float sqj = sq(qj);
+	float sqk = sq(qk);
+
+	ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+	ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+	ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
+
+	if (degrees)
 	{
-		while (1)
-		{
-			snprintf(report, sizeof(report), "Failed to init BMI088! Status: %d", bmi_status);
-			Serial.println(report);
-			delay(1000);
-		}
+		ypr->yaw *= RAD_TO_DEG;
+		ypr->pitch *= RAD_TO_DEG;
+		ypr->roll *= RAD_TO_DEG;
 	}
-	Serial.println("BMI088 started!");
+}
 
-	delay(1000);
-	Serial.println("Starting...");
+void quaternionToEulerRV(sh2_RotationVectorWAcc_t *rotational_vector, euler_t *ypr, bool degrees = false)
+{
+	quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+}
+
+void quaternionToEulerGI(sh2_GyroIntegratedRV_t *rotational_vector, euler_t *ypr, bool degrees = false)
+{
+	quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
 void loop()
 {
-	mag.read();
-	snprintf(
-		report, sizeof(report), "M: %6d %6d %6d",
-		mag.m.x, mag.m.y, mag.m.z);
-	Serial.println(report);
-	mx = mag.m.x;
-	my = mag.m.y;
-	mz = mag.m.z;
 
-	bmi.readSensor();
-	T = bmi.getTemperature_C();
-	ax = bmi.getAccelX_mss();
-	ay = bmi.getAccelY_mss();
-	az = bmi.getAccelZ_mss();
-	gx = bmi.getGyroX_rads();
-	gy = bmi.getGyroY_rads();
-	gz = bmi.getGyroZ_rads();
+	if (bno08x.wasReset())
+	{
+		Serial.print("sensor was reset ");
+		setReports(reportType, reportIntervalUs);
+	}
 
-	snprintf(
-		report, sizeof(report), "T: %6.2f A: %6.2f %6.2f %6.2f G: %6.4f %6.4f %6.4f",
-		T, ax, ay, az, gx, gy, gz);
-	Serial.println(report);
-
-	deltat = fusion.deltatUpdate(); //this have to be done before calling the fusion update
-	//choose only one of these two:
-	// fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);  //mahony is suggested if there isn't the mag and the mcu is slow
-	fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, mx, my, mz, deltat);  //else use the magwick, it is slower but more accurate
-
-	pitch = fusion.getPitch();
-	roll = fusion.getRoll();    //you could also use getRollRadians() ecc
-	yaw = fusion.getYaw();
-
-	Serial.print("Pitch:\t"); Serial.println(pitch);
-	Serial.print("Roll:\t"); Serial.println(roll);
-	Serial.print("Yaw:\t"); Serial.println(yaw);
-	Serial.println();
-
-	delay(100);
+	if (bno08x.getSensorEvent(&sensorValue))
+	{
+		// in this demo only one report type will be received depending on FAST_MODE define (above)
+		switch (sensorValue.sensorId)
+		{
+		case SH2_ARVR_STABILIZED_RV:
+			quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+		case SH2_GYRO_INTEGRATED_RV:
+			// faster (more noise?)
+			quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+			break;
+		}
+		static long last = 0;
+		long now = micros();
+		Serial.print(now - last);
+		Serial.print("\t");
+		last = now;
+		Serial.print(sensorValue.status);
+		Serial.print("\t"); // This is accuracy in the range of 0 to 3
+		Serial.print(ypr.yaw);
+		Serial.print("\t");
+		Serial.print(ypr.pitch);
+		Serial.print("\t");
+		Serial.println(ypr.roll);
+	}
 }
