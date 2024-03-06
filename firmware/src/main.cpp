@@ -15,6 +15,11 @@
 // but not for I2C or UART
 #define BNO08X_RESET -1
 
+#define RADIAN_TO_DEG( x )    ( ( x ) * 180.F / ( float ) M_PI )
+
+#define SMALL_EPSILON    ( 0.000001F )
+#define SMALL_TILT    ( 0.01F )
+
 struct euler_t
 {
 	float yaw;
@@ -66,6 +71,8 @@ void setup(void)
 
 	Serial.println("Reading events");
 	delay(100);
+
+	pinMode(2, INPUT);
 }
 
 void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t *ypr, bool degrees = false)
@@ -98,6 +105,70 @@ void quaternionToEulerGI(sh2_GyroIntegratedRV_t *rotational_vector, euler_t *ypr
 	quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
+void quaternionToControlAngles(sh2_Quaternion_t *quaternion, euler_t *ypr)
+{
+	// ypr->pitch = atan2((2 * (quaternion->x * quaternion->y + quaternion->w * quaternion->z)), (quaternion->w*quaternion->w + quaternion->x*quaternion->x - quaternion->y*quaternion->y - quaternion->z*quaternion->z));
+	// ypr->roll = atan2((- 2 * (quaternion->x * quaternion->z - quaternion->w * quaternion->y)), (quaternion->w*quaternion->w + quaternion->x*quaternion->x - quaternion->y*quaternion->y - quaternion->z*quaternion->z));
+
+	// float torsion_quat_norm = sqrt(quaternion->w*quaternion->w + quaternion->x*quaternion->x);
+	// sh2_Quaternion_t torsion_quaternion = {quaternion->w/torsion_quat_norm, quaternion->x/torsion_quat_norm, 0, 0};
+	// ypr->yaw =
+
+    //yaw rotation around x
+    //pitch rotation around z
+    //roll rotation around y
+    float q0 = quaternion->w; //w
+    float q1 = quaternion->z; //x
+    float q2 = - quaternion->x; //y
+    float q3 = quaternion->y; //z
+
+    float fAngle;
+    float fInvSqrt_q0q0_q1q1 = 1.0f/sqrtf(q0 * q0 + q1 * q1);
+
+    float r11, r12;
+
+    float xY = 0;
+    float xP = 0;
+    float xR = 0;
+
+    /* Yaw extraction */
+
+    float q0_tors = q0 * fInvSqrt_q0q0_q1q1;
+    float q1_tors = q1 * fInvSqrt_q0q0_q1q1;
+
+    fAngle = 2 * acosf( q0_tors );
+    if( 1 - ( q0_tors * q0_tors ) < SMALL_EPSILON )
+    {
+        xY = q1_tors;
+    }
+    else
+    {
+        float fScale = sqrtf( 1 - q0_tors * q0_tors );
+        xY = q1_tors / fScale;
+    }
+    xY = xY * fAngle;
+
+    /* Pitch extraction */
+    /* Using euler angles order zyx and using z as pitch */
+    r11 = 2*(q1*q2 + q0*q3);
+    r12 = q0*q0 + q1*q1 - q2*q2 - q3*q3;
+    xP = atan2f(r11, r12);
+
+    /* Roll extraction */
+    /* Using euler angles order yzx and using y as roll */
+    r11 = -2*(q1*q3 - q0*q2);
+    //r12 = q0*q0 + q1*q1 - q2*q2 - q3*q3; // already calculated above
+    xR = atan2f(r11, r12);
+
+    ypr->yaw = -RADIAN_TO_DEG( xY ); //yaw
+    ypr->pitch = RADIAN_TO_DEG( xP ); //pitch
+    ypr->roll = RADIAN_TO_DEG( xR ); //roll
+
+}
+
+int prevButtonState_1 = 1;
+int prevButtonState_2 = 1;
+
 void loop()
 {
 
@@ -121,15 +192,60 @@ void loop()
 		}
 		static long last = 0;
 		long now = micros();
-		Serial.print(now - last);
-		Serial.print("\t");
-		last = now;
-		Serial.print(sensorValue.status);
-		Serial.print("\t"); // This is accuracy in the range of 0 to 3
-		Serial.print(ypr.yaw);
-		Serial.print("\t");
-		Serial.print(ypr.pitch);
-		Serial.print("\t");
-		Serial.println(ypr.roll);
+		sh2_Quaternion_t quat = {sensorValue.un.arvrStabilizedRV.i, sensorValue.un.arvrStabilizedRV.j, sensorValue.un.arvrStabilizedRV.k, sensorValue.un.arvrStabilizedRV.real};
+		quaternionToControlAngles(&quat, &ypr);
+		float q0 = quat.w; //w
+		float q1 = quat.z; //x
+		float q2 = - quat.x; //y
+		float q3 = quat.y; //z
+		// Serial.print(now - last);
+		// Serial.print("\t");
+		// last = now;
+		// Serial.print(sensorValue.status);
+		// Serial.print("\t"); // This is accuracy in the range of 0 to 3
+		Serial.print("w");
+		Serial.print(q0);
+		Serial.print("w");
+		Serial.print("a");
+		Serial.print(q1);
+		Serial.print("a");
+		Serial.print("b");
+		Serial.print(q2);
+		Serial.print("b");
+		Serial.print("c");
+		Serial.print(q3);
+		Serial.println("c");
+		// Serial.print("yaw: ");
+		// Serial.print(ypr.yaw);
+		// Serial.print("\t");
+		// Serial.print("pitch: ");
+		// Serial.print(ypr.pitch);
+		// Serial.print("\t");
+		// Serial.print("roll: ");
+		// Serial.println(ypr.roll);
+
+		int buttonState_1 = digitalRead(2);
+
+		if (!buttonState_1 && prevButtonState_1) {
+			prevButtonState_1 = buttonState_1;
+			sh2_Quaternion_t myQuaternion = {0, 0, q1, q0};
+			sh2_setReorientation(&myQuaternion);
+			//Serial.println("hello");
+		}
+		else {
+			prevButtonState_1 = buttonState_1;
+		}
+
+		int buttonState_2 = digitalRead(3);
+
+		if (!buttonState_2 && prevButtonState_2) {
+			prevButtonState_2 = buttonState_2;
+			sh2_Quaternion_t myQuaternion = {0, 0, 0, 1};
+			sh2_setReorientation(&myQuaternion);
+			//Serial.println("hello");
+		}
+		else {
+			prevButtonState_2 = buttonState_2;
+		}
 	}
 }
