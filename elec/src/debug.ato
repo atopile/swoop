@@ -56,11 +56,11 @@ module Debug:
     swoop.power_supply.power5v ~ saleae4.ch1
     swoop.power_supply.battery.power ~ saleae4.ch2
 
-    swoop.radio.radio.spi ~ saleae5.spi
-    swoop.radio.radio.data1 ~ saleae6.ch0
-    swoop.radio.radio.data2 ~ saleae6.ch1
-    swoop.radio.radio.data3 ~ saleae6.ch2
-    swoop.radio.radio.busy ~ saleae6.ch3
+    swoop.radio._radio.spi ~ saleae5.spi
+    swoop.radio._radio.data1 ~ saleae6.ch0
+    swoop.radio._radio.data2 ~ saleae6.ch1
+    swoop.radio._radio.data3 ~ saleae6.ch2
+    swoop.radio._radio.busy ~ saleae6.ch3
 
     swoop.power3v3 ~ pot.power
     swoop.micro.micro.gpio23 ~ pot.output.io
