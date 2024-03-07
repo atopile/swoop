@@ -19,11 +19,7 @@ dependencies:
 - rp2040
 - saleae-header ^v0.0.2
 - sk6805-ec20
-- stm32l432kbu6
 - sx1280imltrt
 - tps63020dsjr
 - usb-connectors ^v2.0.1
-
-
-# services:
-#   components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc
+- esp32-s3 ^v0.0.1

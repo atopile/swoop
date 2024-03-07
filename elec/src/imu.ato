@@ -23,7 +23,7 @@ module IMU:
 
     # I2C
     i2c ~ bno055.i2c # address = 0x28
-    i2c ~ bmi088.i2c # address = 0x19
+    i2c ~ bmi088.i2c # address = 0x18, 0x69
     i2c ~ lis3mdltr.i2c # address = 0x1E
 
     # Interrupt
