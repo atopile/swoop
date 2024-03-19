@@ -1,0 +1,46 @@
+import Micro from "micro.ato"
+import PowerSupply from "power-supply.ato"
+import IMU from "imu.ato"
+import Radio from "radio.ato"
+import IOs from "ios.ato"
+
+import Power from "generics/interfaces.ato"
+
+module Swoop:
+    """
+    Swoop is an opensource motion controller for FPV drones.
+    Compatable with ExpressLRS.
+    """
+    power3v3 = new Power
+
+    # Create modules
+    micro = new Micro
+    power_supply = new PowerSupply
+    imu = new IMU
+    radio = new Radio
+    ios = new IOs
+
+    # Comms
+    micro.usb2 ~ ios.usb2
+    micro.power ~ power3v3
+    micro.uart ~ radio.uart
+    micro.i2c ~ imu.i2c
+    micro.i2c ~ ios.i2c
+    micro.interrupt ~ imu.interrupt
+
+    # GPIO
+    micro.led_dout ~ ios.led_din
+    micro.power_btn ~ ios.power_btn
+    micro.menu_btn_1 ~ ios.menu_btn_1
+    micro.menu_btn_2 ~ ios.menu_btn_2
+    micro.menu_btn_3 ~ ios.menu_btn_3
+    micro.hall_sense ~ ios.hall_sense
+
+    # Regultators
+    ios.power5v ~ power_supply.power5v
+    power_supply.power3v3 ~ power3v3
+
+    # power connections
+    power3v3 ~ imu.power
+    power3v3 ~ radio.power
+    power3v3 ~ ios.power3v3

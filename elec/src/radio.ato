@@ -1,0 +1,62 @@
+from "generics/interfaces.ato" import Power, UART, Pair
+from "generics/buttons.ato" import ButtonPullup, ButtonSKRPACE010
+
+from "sx1280imltrt/elec/src/sx1280imltrt.ato" import SX1280
+from "programming-headers/elec/src/programming-headers.ato" import JTAG_10PIN
+from "esp32-s3/elec/src/esp32-s3.ato" import ESP32S3
+from "sk6805-ec20/elec/src/sk6805-ec20.ato" import SK6805EC20
+
+
+module Radio:
+    """
+    ExpressLRS Radio Module based on the SX1280 and ESP32-S3
+
+    Required setup:
+    - 3.3V power ~> power
+    - A button in place of 'boot_button.btn'
+    - UART for comms with handset
+
+    Optional setup:
+    - An RGB LED ~> led_do_if
+
+    TODO: validate configuration in firmware
+    https://github.com/mawildoer/ExpressLRS-targets/blob/mawildoer/swoop/TX/DIY%20S3_WROOM_1_N16R2%202400.json
+    """
+    power  = new Power
+    uart = new UART
+    _micro = new ESP32S3
+    _radio = new SX1280
+
+    # Optional: Interface to connect an RGB LED to the radio
+    led_do_if = new Pair
+    led_do_if.gnd ~ power.gnd
+
+    # external connections
+    power ~ _micro.power
+    power ~ _radio.power
+
+    # ESP32
+    # UART connections need to be crossed (need a better way to do this)
+    # This means people can connect straight to the UART as needed
+    uart.tx ~ _micro.ic.RXD0  # GPIO43
+    uart.rx ~ _micro.ic.TXD0  # GPIO44
+    power.gnd ~ uart.gnd
+
+    boot_button = new ButtonPullup
+    boot_button.btn -> ButtonSKRPACE010
+    _micro.power ~ boot_button.power
+    boot_button.output.vcc ~ _micro.ic.IO0
+
+    _radio.spi.miso ~ _micro.ic.IO15
+    _radio.spi.mosi ~ _micro.ic.IO16
+    _radio.spi.sck  ~ _micro.ic.IO7
+    _radio.busy.io  ~ _micro.ic.IO4
+    _radio.data1.io ~ _micro.ic.IO5
+    _radio.reset.io ~ _micro.ic.IO6
+    _radio.spi.cs   ~ _micro.ic.IO17
+
+    _micro.ic.IO48 ~ led_do_if.io
+
+    # JTAG header
+    jtag_header = new JTAG_10PIN
+    jtag_header.jtag ~ _micro.jtag
