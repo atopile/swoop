@@ -1,7 +1,7 @@
 ato-version: ^0.2.0
 builds:
-  # default:
-  #   entry: elec/src/swoop.ato:Swoop
+  default:
+    entry: elec/src/swoop.ato:Swoop
   debug:
     entry: elec/src/debug.ato:Debug
 dependencies:
