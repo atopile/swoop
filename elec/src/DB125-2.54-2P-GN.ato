@@ -1,9 +1,0 @@
-component DB125_2_54_2P_GN:
-    # component DB125-2.54-2P-GN
-    footprint = "CONN-TH_DB125-2.54-2P-GN"
-    lcsc_id = "C918120"
-    mpn = "C918120"
-    # pins
-    signal _1 ~ pin 1
-    signal _2 ~ pin 2
-
