@@ -1,4 +1,6 @@
 """
+Utility to represent the orientation of the IMU in 3D using Pygame and PyOpenGL.
+Find the repository here: https://github.com/thecountoftuscany/PyTeapot-Quaternion-Euler-cube-rotation
 PyTeapot module for drawing rotating cube using OpenGL as per
 quaternion or yaw, pitch, roll angles received over serial port.
 """

@@ -106,6 +106,11 @@ void quaternionToEulerGI(sh2_GyroIntegratedRV_t *rotational_vector, euler_t *ypr
 }
 
 void quaternionToControlAngles(sh2_Quaternion_t *quaternion, euler_t *ypr)
+/*
+The extraction of the YPR angles does not correspond to any of the standard Euler angles sequences.
+The reason for this is to provide the best possible feeling to the pilot, preventing the hand from
+tilting too far in the corners and ensuring symmetry for the pitch and roll angles.
+*/
 {
 	// ypr->pitch = atan2((2 * (quaternion->x * quaternion->y + quaternion->w * quaternion->z)), (quaternion->w*quaternion->w + quaternion->x*quaternion->x - quaternion->y*quaternion->y - quaternion->z*quaternion->z));
 	// ypr->roll = atan2((- 2 * (quaternion->x * quaternion->z - quaternion->w * quaternion->y)), (quaternion->w*quaternion->w + quaternion->x*quaternion->x - quaternion->y*quaternion->y - quaternion->z*quaternion->z));
@@ -117,6 +122,7 @@ void quaternionToControlAngles(sh2_Quaternion_t *quaternion, euler_t *ypr)
     //yaw rotation around x
     //pitch rotation around z
     //roll rotation around y
+	// The quaternion order and sign has to be changed to ensure that the YPR values are correct
     float q0 = quaternion->w; //w
     float q1 = quaternion->z; //x
     float q2 = - quaternion->x; //y
@@ -215,14 +221,6 @@ void loop()
 		Serial.print("c");
 		Serial.print(q3);
 		Serial.println("c");
-		// Serial.print("yaw: ");
-		// Serial.print(ypr.yaw);
-		// Serial.print("\t");
-		// Serial.print("pitch: ");
-		// Serial.print(ypr.pitch);
-		// Serial.print("\t");
-		// Serial.print("roll: ");
-		// Serial.println(ypr.roll);
 
 		int buttonState_1 = digitalRead(2);
 
@@ -230,7 +228,6 @@ void loop()
 			prevButtonState_1 = buttonState_1;
 			sh2_Quaternion_t myQuaternion = {0, 0, q1, q0};
 			sh2_setReorientation(&myQuaternion);
-			//Serial.println("hello");
 		}
 		else {
 			prevButtonState_1 = buttonState_1;
@@ -242,7 +239,6 @@ void loop()
 			prevButtonState_2 = buttonState_2;
 			sh2_Quaternion_t myQuaternion = {0, 0, 0, 1};
 			sh2_setReorientation(&myQuaternion);
-			//Serial.println("hello");
 		}
 		else {
 			prevButtonState_2 = buttonState_2;
