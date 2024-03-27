@@ -9,4 +9,5 @@ The project contains two subsystems
 1) RP2040, sensors and IOs. Those are meant to capture the inputs of the user and generate the control outputs.
 2) ELRS module. This module is meant to communicate with the aircraft's receiver.
 
-![IMG_7408](https://github.com/atopile/swoop/assets/9785003/54c2f4aa-e80d-42bb-897c-82b45a4320d4)
+![IMG_7410](https://github.com/atopile/swoop/assets/9785003/696a1b3a-4fe3-41b3-800c-c4fb4323561a)
+
