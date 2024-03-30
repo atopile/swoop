@@ -1,0 +1,75 @@
+from "generics/interfaces.ato" import Power, I2C, UART, Pair, USB2
+from "generics/resistors.ato" import I2CPullup
+from "generics/buttons.ato" import ButtonSKRPACE010
+from "qwiic-connectors/elec/src/qwiic-connectors.ato" import QwiicConnector
+from "rp2040/RP2040Kit.ato" import RP2040Kit
+from "generics/debug.ato" import TestPoint
+
+
+module Micro:
+    power = new Power
+    i2c = new I2C
+    uart = new UART
+    interrupt = new Pair
+    usb2 = new USB2
+    power_btn = new Pair
+    menu_btn = new Pair
+    led_dout = new Pair
+    hall_sense = new Pair
+    charge_status = new Pair
+    qwiic = new QwiicConnector
+
+    # pick a micro
+    micro = new RP2040Kit
+
+    # pick a pullup resistor
+    i2c_pullup = new I2CPullup
+    i2c_pullup.r_sda.value = 2kohm +/- 10%
+    i2c_pullup.r_scl.value = 2kohm +/- 10%
+
+
+    # pick buttons
+    micro.reset_btn.btn -> ButtonSKRPACE010
+    micro.boot_btn.btn -> ButtonSKRPACE010
+
+
+    # map module to ic
+    power ~ micro.power_3v3
+    power ~ i2c_pullup.power
+    power ~ qwiic.power
+    i2c ~ micro.i2c
+    i2c ~ qwiic.i2c
+    i2c ~ i2c_pullup.i2c
+    uart ~ micro.uart
+    interrupt.io ~ micro.gpio24
+    interrupt.gnd ~ power.gnd
+    usb2 ~ micro.usb2
+    power_btn.io ~ micro.gpio12
+    menu_btn.io ~ micro.gpio13
+    led_dout.io ~ micro.gpio7
+    hall_sense.io ~ micro.gpio26_a0
+    charge_status.io ~ micro.gpio17
+
+    # can delete if micro had Pairs instead of signals
+    power_btn.gnd ~ power.gnd
+    menu_btn.gnd ~ power.gnd
+    led_dout.gnd ~ power.gnd
+
+    # debug test points
+    # I2C
+    scl_tp = new TestPoint
+    scl_tp.point ~ i2c.scl
+
+    sda_tp = new TestPoint
+    sda_tp.point ~ i2c.sda
+
+    # UART
+    tx_tp = new TestPoint
+    tx_tp.point ~ uart.tx
+
+    rx_tp = new TestPoint
+    rx_tp.point ~ uart.rx
+
+    # Interrupt
+    int_tp = new TestPoint
+    int_tp.point ~ interrupt.io

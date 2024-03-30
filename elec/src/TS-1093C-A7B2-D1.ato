@@ -1,0 +1,11 @@
+component TS_1093C_A7B2_D1 from NoButton:
+    # component TS-1093C-A7B2-D1
+    footprint = "SW-TH_TS-1093C-A7B3-D1"
+    lcsc_id = "C2682918"
+    mpn = "C2682918"
+    # pins
+    signal EP ~ pin 3
+    signal _1 ~ pin 1
+    signal _2 ~ pin 2
+    EP ~ pin 4
+

@@ -1,0 +1,79 @@
+import Swoop from "swoop.ato"
+import SaleaeHeader from "saleae-header/saleae-header.ato"
+import Pair from "generics/interfaces.ato"
+import Power from "generics/interfaces.ato"
+import VDiv from "generics/vdivs.ato"
+from "generics/leds.ato" import LEDIndicatorRed, LEDIndicatorGreen, LEDIndicatorBlue
+
+module Debug:
+    """
+    Swoop debug build with test points and saleae headers
+    """
+    swoop = new Swoop
+
+    battery_indicator = new LEDIndicatorRed
+    power5V_indicator = new LEDIndicatorGreen
+    power3V3_indicator = new LEDIndicatorBlue
+
+    # Connect LEDs
+    swoop.power_supply.power3v3 ~ power3V3_indicator.power
+    swoop.power_supply.power5v ~ power5V_indicator.power
+    swoop.power_supply.battery.power ~ battery_indicator.power
+
+    # Configure leds
+    power3V3_indicator.v_in = 3.3V +/- 5%
+    power3V3_indicator.current = 1mA to 3mA
+    power5V_indicator.v_in = 5V +/- 5%
+    power5V_indicator.current = 1mA to 3mA
+    battery_indicator.v_in = 4.2V +/- 5%
+    battery_indicator.current = 1mA to 3mA
+
+
+    saleae1 = new SaleaeHeader
+    saleae2 = new SaleaeHeader
+    saleae3 = new SaleaeHeader
+    saleae4 = new SaleaeHeader
+    saleae5 = new SaleaeHeader
+    saleae6 = new SaleaeHeader
+
+    pot = new _RK09K1130AJ3
+
+    # I2c: ch0 = SDA, ch1 = SCL
+    # UART: ch2 = TX, ch3 = RX
+
+    swoop.radio.uart ~ saleae1.uart
+    swoop.imu.i2c ~ saleae1.i2c
+    swoop.imu.interrupt ~ saleae2.ch0
+
+    swoop.ios.led_din ~ saleae2.ch1
+    swoop.ios.usb2 ~ saleae2.usb2
+    swoop.ios.power_btn ~ saleae3.ch0
+    swoop.ios.menu_btn ~ saleae3.ch1
+
+    swoop.power_supply.power3v3 ~ saleae4.ch0
+    swoop.power_supply.power5v ~ saleae4.ch1
+    swoop.power_supply.battery.power ~ saleae4.ch2
+
+    swoop.radio._radio.spi ~ saleae5.spi
+    swoop.radio._radio.data1 ~ saleae6.ch0
+    swoop.radio._radio.data2 ~ saleae6.ch1
+    swoop.radio._radio.data3 ~ saleae6.ch2
+    swoop.radio._radio.busy ~ saleae6.ch3
+
+    swoop.power3v3 ~ pot.power
+    swoop.micro.micro.gpio23 ~ pot.output.io
+
+component _RK09K1130AJ3:
+    # component RK09K1130AJ3
+    footprint = "RES-ADJ-TH_RK09K1130AJ3"
+    lcsc_id = "C388854"
+    mpn = "C388854"
+    # pins
+    output = new Pair
+    power = new Power
+    power.gnd ~ pin 1
+    output.io ~ pin 2
+    power.vcc ~ pin 3
+
+    power.gnd ~ output.gnd
+
