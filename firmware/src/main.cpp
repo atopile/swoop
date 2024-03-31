@@ -33,8 +33,10 @@ float pitch, roll, yaw, throttle;
 float deltat;
 volatile int flightMode = 1; // Starts at mode 1
 unsigned long buttonPressTime = 0;
-bool isPressing = false;
+bool buttonState = false;
+bool lastButtonState = false;
 bool deviceState = false;
+
 
 float getThrottle() {
   int rawValue = analogRead(A0); // Assuming A0 is the throttle input pin
@@ -43,15 +45,54 @@ float getThrottle() {
   return throttle;
 }
 
+void animatePowerOn(int percentage) {
+  const CRGB lowPowerColor = CRGB::Black;
+  CRGB highPowerColor = CRGB::Green;
+
+  if (deviceState) {
+    highPowerColor = CRGB::Red;
+  }
+
+  // Calculate how many LEDs should be lit based on the percentage
+  int numLedsLit = (percentage * NUM_LEDS) / 100;
+  int remainder = (percentage * NUM_LEDS) % 100; // For partial LED coloring
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    if (i < numLedsLit) {
+      // These LEDs are fully powered/on
+      leds[i] = highPowerColor;
+    } else if (i == numLedsLit && remainder != 0) {
+      // This LED is partially lit based on the remainder, mix colors
+      float mixRatio = remainder / 100.0;
+      leds[i] = blend(lowPowerColor, highPowerColor, mixRatio * 255);
+    } else {
+      // These LEDs are off/low power
+      leds[i] = lowPowerColor;
+    }
+  }
+
+  FastLED.show();
+}
 
 void updateLEDs() {
+  if(digitalRead(POWER_BUTTON_PIN) == LOW){
+    FastLED.show();
+    return;
+  }
+
   if (!deviceState) {
     for (int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CRGB::Black; // Turn off all LEDs
     }
+    FastLED.show();
     return;
   }
+  else {
+    leds[0] = CRGB::Green;
+  }
   leds[0] = CRGB::Green;
+  FastLED.show();
+
   switch (flightMode) {
     case 1:
       Serial.println(">Flight Mode: 1");
@@ -92,31 +133,42 @@ void changeFlightMode() {
 }
 
 void nonBlockingButtonCheck() {
-  static unsigned long lastDebounceTime = 0;
-  static bool lastButtonState = HIGH;
-  unsigned long currentMillis = millis();
+  // Starts a timer if button is pressed, resets if released
+  buttonState = digitalRead(POWER_BUTTON_PIN);
+  Serial.print("Button state: "); Serial.println(buttonState ? "HIGH" : "LOW");
 
-  bool currentButtonState = !digitalRead(POWER_BUTTON_PIN);
-  Serial.println(currentButtonState);
-  Serial.println(deviceState);
-  if (currentButtonState != lastButtonState) {
-    lastDebounceTime = currentMillis;
-  }
-
-  if ((currentMillis - lastDebounceTime) > 50) { // Debounce delay
-    if (!isPressing && currentButtonState == LOW) {
-      buttonPressTime = currentMillis;
-      isPressing = true;
-    } else if (isPressing && currentButtonState == HIGH) {
-      isPressing = false;
-      if (currentMillis - buttonPressTime > LONG_PRESS_TIME) {
-        deviceState = !deviceState; // Toggle device state
-      }
+  // if the button is being pressed, and the timer is not running, start the timer
+  if (buttonState == LOW ) {
+    Serial.println("Button is pressed.");
+    if (buttonPressTime == 0){
+      buttonPressTime = millis();
+      Serial.println("Timer started.");
+    }
+    else if (millis() - buttonPressTime > LONG_PRESS_TIME) {
+      // If the button is pressed for LONG_PRESS_TIME, toggle the device state
+      deviceState = !deviceState;
+      Serial.print("Device state toggled to: "); Serial.println(deviceState ? "ON" : "OFF");
+      buttonPressTime = 0;
+    }
+    else {
+      // update the led strip based on the percentage of time the button has been pressed
+      int percentage = (millis() - buttonPressTime) * 100 / LONG_PRESS_TIME;
+      Serial.print("Button hold percentage: "); Serial.println(percentage);
+      animatePowerOn(percentage);
     }
   }
+  // else, if the button is not pressed, reset the timer to 0
+  else if (buttonState == HIGH) {
+    if (buttonPressTime != 0) {
+      Serial.println("Button released. Timer reset.");
+    }
+    buttonPressTime = 0;
+  }
 
-  lastButtonState = currentButtonState;
+  lastButtonState = buttonState;
+
 }
+
 
 
 void setup() {
@@ -146,11 +198,19 @@ void setup() {
 }
 
 void loop() {
+  nonBlockingButtonCheck();
+  updateLEDs();
+
+  if (!deviceState) {
+    Serial.println("Device is powered off.");
+    return;
+  }
+
+
   mag.read();
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  nonBlockingButtonCheck();
 
   deltat = fusion.deltatUpdate();
   fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, mag.x, mag.y, mag.z, deltat);
@@ -165,6 +225,8 @@ void loop() {
   Serial.print(">Yaw:\t"); Serial.println(yaw);
   Serial.print(">Throttle:\t"); Serial.println(throttle);
   Serial.println();
+
+  // animatePowerOn(throttle);
 
   delay(10);
 
