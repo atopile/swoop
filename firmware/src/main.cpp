@@ -95,21 +95,21 @@ void updateLEDs() {
 
   switch (flightMode) {
     case 1:
-      Serial.println(">Flight Mode: 1");
+      // Serial.println(">Flight Mode: 1");
       leds[1] = CRGB::Blue;
       leds[2] = CRGB::Black; // LED 3 off
       leds[3] = CRGB::Black; // LED 4 off
       FastLED.show();
       break;
     case 2:
-      Serial.println(">Flight Mode: 2");
+      // Serial.println(">Flight Mode: 2");
       leds[1] = CRGB::Black; // LED 2 off
       leds[2] = CRGB::Blue;
       leds[3] = CRGB::Black; // LED 4 off
       FastLED.show();
       break;
     case 3:
-      Serial.println(">Flight Mode: 3");
+      // Serial.println(">Flight Mode: 3");
       leds[1] = CRGB::Black; // LED 2 off
       leds[2] = CRGB::Black; // LED 3 off
       leds[3] = CRGB::Blue;
@@ -135,7 +135,7 @@ void changeFlightMode() {
 void nonBlockingButtonCheck() {
   // Starts a timer if button is pressed, resets if released
   buttonState = digitalRead(POWER_BUTTON_PIN);
-  Serial.print("Button state: "); Serial.println(buttonState ? "HIGH" : "LOW");
+  // Serial.print("Button state: "); Serial.println(buttonState ? "HIGH" : "LOW");
 
   // if the button is being pressed, and the timer is not running, start the timer
   if (buttonState == LOW ) {
@@ -168,7 +168,6 @@ void nonBlockingButtonCheck() {
   lastButtonState = buttonState;
 
 }
-
 
 
 void setup() {
@@ -215,16 +214,18 @@ void loop() {
   deltat = fusion.deltatUpdate();
   fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, mag.x, mag.y, mag.z, deltat);
 
-  pitch = fusion.getPitch();
-  roll = fusion.getRoll();    //you could also use getRollRadians() ecc
-  yaw = fusion.getYaw();
+  // pitch = fusion.getPitch();
+  // roll = fusion.getRoll();    //you could also use getRollRadians() ecc
+  // yaw = fusion.getYaw();
   throttle = getThrottle();
 
-  Serial.print(">Pitch:\t"); Serial.println(pitch);
-  Serial.print(">Roll:\t"); Serial.println(roll);
-  Serial.print(">Yaw:\t"); Serial.println(yaw);
-  Serial.print(">Throttle:\t"); Serial.println(throttle);
-  Serial.println();
+  float* quat = fusion.getQuat();
+  Serial.print("w"); Serial.print(quat[0]);Serial.print("w");
+  Serial.print("a"); Serial.print(quat[1]);Serial.print("a");
+  Serial.print("b"); Serial.print(quat[2]);Serial.print("b");
+  Serial.print("c"); Serial.print(quat[3]);Serial.println("c");
+  // Serial.print(">Throttle:\t"); Serial.println(throttle);
+  // Serial.println();
 
   // animatePowerOn(throttle);
 
