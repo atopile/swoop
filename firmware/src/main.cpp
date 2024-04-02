@@ -212,7 +212,10 @@ void loop() {
 
 
   deltat = fusion.deltatUpdate();
-  fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, mag.x, mag.y, mag.z, deltat);
+  // the chips are in different orientation. Following both of those
+  // mag datasheet: https://www.mouser.com/datasheet/2/389/lis3mdl-1849592.pdf
+  // mpu datasheet: https://www.cdiweb.com/datasheets/invensense/mpu_6500_rev1.0.pdf
+  fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, -mag.y, mag.x, mag.z, deltat);
 
   // pitch = fusion.getPitch();
   // roll = fusion.getRoll();    //you could also use getRollRadians() ecc
