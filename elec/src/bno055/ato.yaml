@@ -1,0 +1,6 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/bno055.ato:BNO055
+dependencies:
+- generics

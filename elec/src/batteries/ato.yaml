@@ -1,0 +1,3 @@
+ato-version: v0.3.0
+dependencies:
+- generics

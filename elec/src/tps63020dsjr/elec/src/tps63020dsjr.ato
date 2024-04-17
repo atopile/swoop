@@ -1,0 +1,114 @@
+import Power from "generics/interfaces.ato"
+import AdjustableRegulator from "generics/regulators.ato"
+import Inductor from "generics/inductors.ato"
+import Capacitor from "generics/capacitors.ato"
+import Resistor from "generics/resistors.ato"
+
+component _TPS63020DSJR:
+    # component TPS63020DSJR
+    footprint = "VSON-14_L4.0-W3.0-P0.50-BL-EP_TI_DSJ"
+    lcsc_id = "C15483"
+    mpn = "C15483"
+    # pins
+    signal VINA ~ pin 1
+    signal GND ~ pin 2
+    signal FB ~ pin 3
+    signal VOUT ~ pin 4
+    VOUT ~ pin 5
+    signal L2 ~ pin 6
+    L2 ~ pin 7
+    signal L1 ~ pin 8
+    L1 ~ pin 9
+    signal VIN ~ pin 10
+    VIN ~ pin 11
+    signal EN ~ pin 12
+    signal PS_SYNC ~ pin 13
+    signal PG ~ pin 14
+    signal PGND ~ pin 15
+
+module TPS63020DSJR from AdjustableRegulator:
+    ic = new _TPS63020DSJR
+
+    v_ref = 500mV
+    v_out = 3V to 4V
+
+    assert v_in within 1.8V to 5.5V
+    assert v_out within 1.2V to 5.5V
+    # Connect power interfaces
+    # power in
+    ic.VIN ~ power_in.vcc
+    ic.GND ~ power_in.gnd
+    ic.PGND ~ power_in.gnd
+
+    # power out
+    ic.VOUT ~ power_out.vcc
+    ic.GND ~ power_out.gnd
+
+    # feedback divider
+    feedback_div.in ~ power_out
+    feedback_div.out ~ ic.FB
+    # feedback_div.r_top.value = 1Mohm +/- 5%
+    feedback_div.r_top.package = "0402"
+    # feedback_div.r_bottom.value = 180kohm +/- 5%
+    feedback_div.r_bottom.package = "0402"
+
+    # Power good pullup resistor
+    power_good_res = new Resistor
+    power_good_res.value = 1Mohm +/- 5%
+    power_good_res.package = "0402"
+    power_good_res.1 ~ ic.PG
+    power_good_res.2 ~ ic.PGND
+
+    # Input caps
+    input_cap_1 = new Capacitor
+    input_cap_1.value = 10uF +/- 20%
+    input_cap_1.package = "0805"
+    input_cap_1.power ~ power_in
+    input_cap_2 = new Capacitor
+    input_cap_2.value = 10uF +/- 20%
+    input_cap_2.package = "0805"
+    input_cap_2.power ~ power_in
+
+    # Output caps
+    output_cap_1 = new Capacitor
+    output_cap_1.value = 10uF +/- 20%
+    output_cap_1.package = "0805"
+    output_cap_1.power ~ power_out
+    output_cap_2 = new Capacitor
+    output_cap_2.value = 10uF +/- 20%
+    output_cap_2.package = "0805"
+    output_cap_2.power ~ power_out
+
+    # VINA cap
+    vina_cap = new Capacitor
+    vina_cap.value = 100nF +/- 20%
+    vina_cap.package = "0402"
+    vina_cap.1 ~ ic.VINA
+    vina_cap.1 ~ ic.EN
+    vina_cap.2 ~ ic.PS_SYNC
+    vina_cap.2 ~ ic.GND
+
+    # Inductor
+    inductor = new Inductor
+    inductor.inductance = 1.5uH +/- 20%
+    inductor.1 ~ ic.L1
+    inductor.2 ~ ic.L2
+
+    inductor -> _WPN252012H1R5MT
+
+
+component _WPN252012H1R5MT from Inductor:
+    # component WPN252012H1R5MT
+    footprint = "IND-SMD_L2.5-W2.0_WPN252012H"
+    lcsc_id = "C98349"
+    mpn = "C98349"
+    inductance = 1.5uH +/- 20%
+    rated_current = 0A to 2.4A
+    dcr = 72mohm +/- 20%
+    saturation_current = 3.5A
+
+
+
+
+
+

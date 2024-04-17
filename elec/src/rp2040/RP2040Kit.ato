@@ -1,0 +1,231 @@
+import RP2040 from "RP2040.ato"
+
+import Resistor from "generics/resistors.ato"
+import Capacitor from "generics/capacitors.ato"
+import ButtonPullup from "generics/buttons.ato"
+
+from "generics/interfaces.ato" import I2C, SPI, UART, USB2, QSPI, Power
+
+# # add default for backwards compatibility
+# module RP2040Kit from RP2040Core:
+#     """
+#     Default implementation, powered by 3v3 rail input
+#     """
+#     power_3v3 ~ micro.usb_phy_power
+
+
+# module USB_Powered_RP2040Kit from RP2040Core:
+#     """
+#     USB powered implementation
+#     """
+#     power_usb = new Power
+#     power_usb ~ micro.usb_phy_power
+
+module RP2040Kit:
+    # External interfaces
+    power_3v3 = new Power
+    i2c = new I2C
+    spi = new SPI
+    qspi = new QSPI
+    uart = new UART
+    usb2 = new USB2
+
+    # depricated name for backwards compatibility
+    power = new Power
+    usb_if = new USB2
+
+    # connect depricated interfaces to new interfaces
+    power ~ power_3v3
+    usb_if ~ usb2
+
+    # Components
+    micro = new RP2040
+    reset_btn = new ButtonPullup
+    boot_btn = new ButtonPullup
+    osc = new _Oscillator
+    flash = new _W25Q128JVSIQ
+    r_usb_d_plus = new Resistor
+    r_usb_d_minus = new Resistor
+
+    # Connect external interfaces
+    power_3v3 ~ micro.usb_phy_power
+    power_3v3 ~ micro.iovdd_power
+    i2c ~ micro.i2c
+    spi ~ micro.spi
+    qspi ~ micro.qspi
+    uart ~ micro.uart
+
+    # Internal
+
+    # Reset button
+    reset_btn.power ~ power_3v3
+    reset_btn.out ~ micro.run
+
+    # Boot button
+    boot_btn.power ~ power_3v3
+    boot_btn.out ~ micro.qspi_ss_n
+    boot_btn.pullup.value = 10kohms +/- 5%
+
+    # Configure the USB series resistors
+    r_usb_d_plus.value = 27ohms +/- 5%
+    r_usb_d_plus.footprint = "R0402"
+    r_usb_d_minus.value = 27ohms +/- 5%
+    r_usb_d_minus.footprint = "R0402"
+
+    # Connect series resistors to usb
+    usb_if.dp ~ r_usb_d_plus.p2; r_usb_d_plus.p1 ~ micro.usb_dp
+    usb_if.dm ~ r_usb_d_minus.p1; r_usb_d_minus.p2 ~ micro.usb_dm
+
+    # Flash
+    power_3v3 ~ flash.power
+    micro.qspi ~ flash.qspi
+
+    # Oscillator
+    osc.input ~ micro.xin
+    osc.output ~ micro.xout
+    osc.gnd ~ micro.gnd
+
+    # 1V power for internal DVDD digital logic
+    power_1V = new Power
+    power_1V.vcc ~ micro.dvdd
+    power_1V.gnd ~ micro.gnd
+
+    # Power the 1V rail from the internal regulator
+    micro.vreg_vin ~ power_3v3.vcc
+    micro.vreg_vout ~ micro.dvdd
+
+    # Bypass capacitors 100nF - 3V3
+    bypass_cap_100nF_1 = new BypassCap100nF
+    bypass_cap_100nF_2 = new BypassCap100nF
+    bypass_cap_100nF_3 = new BypassCap100nF
+    bypass_cap_100nF_4 = new BypassCap100nF
+    bypass_cap_100nF_5 = new BypassCap100nF
+    bypass_cap_1uF = new BypassCap1uF
+    bypass_cap_100nF_6 = new BypassCap100nF
+    bypass_cap_100nF_7 = new BypassCap100nF
+    bypass_cap_100nF_8 = new BypassCap100nF
+    bypass_cap_1uF_1 = new BypassCap1uF
+
+    # 3V3 bypass caps
+    power_3v3 ~ bypass_cap_100nF_1.power
+    power_3v3 ~ bypass_cap_100nF_2.power
+    power_3v3 ~ bypass_cap_100nF_3.power
+    power_3v3 ~ bypass_cap_100nF_4.power
+    power_3v3 ~ bypass_cap_100nF_5.power
+    power_3v3 ~ bypass_cap_1uF.power
+
+    # 1V bypass caps
+    power_1V ~ bypass_cap_100nF_6.power
+    power_1V ~ bypass_cap_100nF_7.power
+    power_1V ~ bypass_cap_100nF_8.power
+    power_1V ~ bypass_cap_1uF_1.power
+
+
+    # make all gpio pins available at the top level
+    signal gpio0 ~ micro.gpio0
+    signal gpio1 ~ micro.gpio1
+    signal gpio2 ~ micro.gpio2
+    signal gpio3 ~ micro.gpio3
+    signal gpio4 ~ micro.gpio4
+    signal gpio5 ~ micro.gpio5
+    signal gpio6 ~ micro.gpio6
+    signal gpio7 ~ micro.gpio7
+    signal gpio8 ~ micro.gpio8
+    signal gpio9 ~ micro.gpio9
+    signal gpio10 ~ micro.gpio10
+    signal gpio11 ~ micro.gpio11
+    signal gpio12 ~ micro.gpio12
+    signal gpio13 ~ micro.gpio13
+    signal gpio14 ~ micro.gpio14
+    signal gpio15 ~ micro.gpio15
+    signal gpio16 ~ micro.gpio16
+    signal gpio17 ~ micro.gpio17
+    signal gpio18 ~ micro.gpio18
+    signal gpio19 ~ micro.gpio19
+    signal gpio20 ~ micro.gpio20
+    signal gpio21 ~ micro.gpio21
+    signal gpio22 ~ micro.gpio22
+    signal gpio23 ~ micro.gpio23
+    signal gpio24 ~ micro.gpio24
+    signal gpio25 ~ micro.gpio25
+    signal gpio26_a0 ~ micro.gpio26_a0
+    signal gpio27_a1 ~ micro.gpio27_a1
+    signal gpio28_a2 ~ micro.gpio28_a2
+    signal gpio29_a3 ~ micro.gpio29_a3
+
+
+component BypassCap from Capacitor:
+    footprint = "R0402"
+
+
+component BypassCap100nF from BypassCap:
+    value = 100nF +/- 20%
+
+
+component BypassCap1uF from BypassCap:
+    value = 1uF +/- 20%
+
+
+component _X322512MSB4SI:
+    frequency = "12MHz"
+    mpn = "C9002"
+    footprint = "OSC-SMD_4P-L3.2-W2.5-BL"
+    signal in ~ pin 1
+    signal out ~ pin 3
+    signal gnd ~ pin 2
+    gnd ~ pin 4
+
+
+module _Oscillator:
+    # the oscillator itself
+    signal input
+    signal output
+    signal gnd
+
+    osc = new _X322512MSB4SI
+    input ~ osc.in
+    gnd ~ osc.gnd
+
+    # output resistor
+    r_osc = new Resistor
+    r_osc.value = 1kohms +/- 5%
+    r_osc.footprint = "R0402"
+    output ~ r_osc.p1; r_osc.p2 ~ osc.out
+
+    # load caps
+    c_osc_1 = new Capacitor
+    c_osc_1.value = 20pF +/- 20%
+    c_osc_1.footprint = "C0402"
+    c_osc_2 = new Capacitor
+    c_osc_2.value = 20pF +/- 20%
+    c_osc_2.footprint = "C0402"
+
+    input ~ c_osc_1.p1; c_osc_1.p2 ~ gnd
+    osc.out ~ c_osc_2.p1; c_osc_2.p2 ~ gnd
+
+
+component _W25Q128JVSIQ:
+    footprint = "SOIC-8_L5.3-W5.3-P1.27-LS8.0-BL"
+    mpn = "C97521"
+
+    # pins
+    signal ncs ~ pin 1
+    signal do ~ pin 2
+    signal io2 ~ pin 3
+    signal gnd ~ pin 4
+    signal di ~ pin 5
+    signal clk ~ pin 6
+    signal io3 ~ pin 7
+    signal vcc ~ pin 8
+
+    power = new Power
+    power.gnd ~ gnd
+    power.vcc ~ vcc
+
+    qspi = new QSPI
+    qspi.cs ~ ncs
+    qspi.sck ~ clk
+    qspi.io0 ~ di
+    qspi.io1 ~ do
+    qspi.io2 ~ io2
+    qspi.io3 ~ io3

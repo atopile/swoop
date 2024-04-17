@@ -1,0 +1,42 @@
+import Power from "generics/interfaces.ato"
+
+module Battery:
+    power = new Power
+
+module BatteryCR2032 from Battery:
+    conn = new _BS_02_A1AJ010
+    conn.vcc ~ power.vcc
+    conn.gnd ~ power.gnd
+
+module Battery18650 from Battery:
+    conn = new _BH_18650_A1AJ005
+    conn.vcc ~ power.vcc
+    conn.gnd ~ power.gnd
+
+module BatteryJST from Battery:
+    conn = new _JST_GH_2P
+    conn.vcc ~ power.vcc
+    conn.gnd ~ power.gnd
+
+component _BH_18650_A1AJ005:
+    # component BH-18650-A1AJ005
+    footprint = "BAT-TH_BH-18650-A1AJ005"
+    mpn = "C5290176"
+    # pins
+    signal gnd ~ pin 1
+    signal vcc ~ pin 2
+
+component _JST_GH_2P:
+    signal gnd ~ pin 1
+    signal vcc ~ pin 2
+    mpn = "C295747"
+    footprint = "CONN-SMD_P2.00_S2B-PH-SM4-TB-LF-SN"
+
+component _BS_02_A1AJ010:
+    # component BS-02-A1AJ010
+    footprint = "BAT-TH_BS-02-A1AJ010"
+    lcsc_id = "C5239862"
+    mpn = "C5239862"
+    # pins
+    signal vcc ~ pin 2
+    signal gnd ~ pin 1

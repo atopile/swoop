@@ -1,0 +1,97 @@
+import Power from "generics/interfaces.ato"
+import I2C from "generics/interfaces.ato"
+import SPI from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+import Resistor from "generics/resistors.ato"
+import Capacitor from "generics/capacitors.ato"
+
+component _BMI088:
+    # component BMI088
+    footprint = "LGA-16_L4.5-W3.0-P0.50-BL"
+    lcsc_id = "C194919"
+    mpn = "C194919"
+    # pins
+    signal INT2 ~ pin 1
+    signal NC ~ pin 2
+    signal VDD ~ pin 3
+    signal GNDA ~ pin 4
+    signal CSB2 ~ pin 5
+    signal GNDIO ~ pin 6
+    signal PS ~ pin 7
+    signal SCL_SCK ~ pin 8
+    signal SDA_SDI ~ pin 9
+    signal SDO2 ~ pin 10
+    signal VDDIO ~ pin 11
+    signal INT3 ~ pin 12
+    signal INT4 ~ pin 13
+    signal CSB1 ~ pin 14
+    signal SDO1 ~ pin 15
+    signal INT1 ~ pin 16
+
+    NC ~ GNDA
+
+    power_vdd = new Power
+    power_vdd.vcc ~ VDD
+    power_vdd.gnd ~ GNDA
+
+    power_vddio = new Power
+    power_vddio.vcc ~ VDDIO
+    power_vddio.gnd ~ GNDIO
+
+    i2c = new I2C
+    i2c.scl ~ SCL_SCK
+    i2c.sda ~ SDA_SDI
+    i2c.gnd ~ GNDA
+
+    # TODO: Interestingly, they gyro and accel are separate SPI interfaces
+    # we dont have an awesome way to support this other than having two SPI interfaces
+    spi = new SPI
+    spi.sck ~ SCL_SCK
+    spi.mosi ~ SDA_SDI
+    spi.miso ~ SDO1
+    spi.miso ~ SDO2
+    # spi.cs ~
+
+module BMI088:
+    ic = new _BMI088
+    power = new Power
+    power ~ ic.power_vdd
+    power ~ ic.power_vddio
+
+    # Select the I2C or SPI interface (I2C = 1, SPI = 0)
+    ic.PS ~ power.vcc
+
+    i2c = new I2C
+    i2c ~ ic.i2c
+
+    # Not currently supported, see above
+    # spi = new SPI
+    # spi ~ ic.spi
+
+    # Interrupts
+    interrupt_1 = new Pair
+    interrupt_1.io ~ ic.INT1
+    interrupt_1.gnd ~ power.gnd
+
+    interrupt_2 = new Pair
+    interrupt_2.io ~ ic.INT2
+    interrupt_2.gnd ~ power.gnd
+
+    interrupt_3 = new Pair
+    interrupt_3.io ~ ic.INT3
+    interrupt_3.gnd ~ power.gnd
+
+    interrupt_4 = new Pair
+    interrupt_4.io ~ ic.INT4
+    interrupt_4.gnd ~ power.gnd
+
+    # Bypass caps
+    bypass_cap_1 = new Capacitor
+    ic.power_vddio ~ bypass_cap_1.power
+    bypass_cap_1.value = 100nF +/- 20%
+    bypass_cap_1.package = "0402"
+
+    bypass_cap_2 = new Capacitor
+    ic.power_vdd ~ bypass_cap_2.power
+    bypass_cap_2.value = 100nF +/- 20%
+    bypass_cap_2.package = "0402"

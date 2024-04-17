@@ -1,0 +1,9 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/bq24045dsqr.ato:BQ24040DSQR
+dependencies:
+- generics
+
+services:
+  components: https://atopile-component-server-atsuhzfd5a-uc.a.run.app/jlc

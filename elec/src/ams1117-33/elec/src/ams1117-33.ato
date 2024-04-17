@@ -1,0 +1,39 @@
+import Regulator from "generics/regulators.ato"
+import Capacitor from "generics/capacitors.ato"
+import Power from "generics/interfaces.ato"
+
+
+component _AMS1117_3_3:
+    # component AMS1117-3.3
+    footprint = "SOT-223-3_L6.5-W3.4-P2.30-LS7.0-BR"
+    lcsc_id = "C6186"
+    mpn = "C6186"
+    # pins
+    signal GND ~ pin 1
+    signal VOUT ~ pin 2
+    signal VIN ~ pin 3
+    VOUT ~ pin 4
+
+    power_out = new Power
+    power_out.vcc ~ VOUT
+    power_out.gnd ~ GND
+
+    power_in = new Power
+    power_in.vcc ~ VIN
+    power_in.gnd ~ GND
+
+
+module AMS111733 from Regulator:
+    ic = new _AMS1117_3_3
+    power_in ~ ic.power_in
+    power_out ~ ic.power_out
+
+    input_cap = new Capacitor
+    input_cap.value = 10uF +/- 20%
+    power_in ~ input_cap.power
+    input_cap.package = "0805"
+
+    output_cap = new Capacitor
+    output_cap.value = 10uF +/- 20%
+    power_out ~ output_cap.power
+    output_cap.package = "0805"

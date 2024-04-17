@@ -1,0 +1,42 @@
+import Capacitor from "generics/capacitors.ato"
+import Resistor from "generics/resistors.ato"
+import Power from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+
+component _AH3772SA7:
+    # component AH3772SA7
+    footprint = "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR-CW"
+    lcsc_id = "C842135"
+    mpn = "C842135"
+    # pins
+    signal VDD ~ pin 1
+    signal GND ~ pin 2
+    signal OUT ~ pin 3
+
+module AH3772SA7:
+    # field strengths from -25G to 25G
+    ic = new _AH3772SA7
+
+    # Input voltage 3V to 28V
+    # Typical supply current 3mA
+    power = new Power
+    power.vcc ~ ic.VDD
+    power.gnd ~ ic.GND
+
+    # Outputs voltage proportional to magnetic field
+    output = new Pair
+    output.io ~ ic.OUT
+    output.gnd ~ ic.GND
+
+    # Pull-up resistor
+    pullup = new Resistor
+    pullup.1 ~ ic.VDD
+    pullup.2 ~ ic.OUT
+    pullup.package = "0402"
+    pullup.value = 1kohm +/- 5%
+
+    # Bypass capacitor
+    bypass = new Capacitor
+    bypass.power ~ power
+    bypass.package = "0402"
+    bypass.value = 100nF +/- 10%

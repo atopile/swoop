@@ -1,0 +1,106 @@
+import Power from "generics/interfaces.ato"
+import Resistor from "generics/resistors.ato"
+import Capacitor from "generics/capacitors.ato"
+import LEDIndicatorBlue from "generics/leds.ato"
+import LEDIndicatorGreen from "generics/leds.ato"
+import Pair from "generics/interfaces.ato"
+
+module BQ24045DSQR from BQ2404XDSQR:
+    """
+    BQ24045DSQR is a 4.35V version of the BQ2404XDSQR
+    """
+    ic.mpn = "C148983"
+    ic.lcsc_id = "C148983"
+
+module BQ24040DSQR from BQ2404XDSQR:
+    """
+    BQ24040DSQR is a 4.2V version of the BQ2404XDSQR
+    """
+    ic.mpn = "C81080"
+    ic.lcsc_id = "C81080"
+
+module BQ2404XDSQR:
+    ic = new _BQ2404XDSQR
+    power_in = new Power
+    power_in ~ ic.power_in
+    charge_current: current
+
+    power_batt = new Power
+    power_batt ~ ic.power_out
+
+    power_good = new Pair
+
+    charge_status = new Pair
+
+    input_cap = new Capacitor
+    input_cap.power ~ power_in
+    input_cap.package = "0402"
+    input_cap.value = 1uF +/- 20%
+
+    output_cap = new Capacitor
+    output_cap.power ~ power_batt
+    output_cap.package = "0402"
+    output_cap.value = 1uF +/- 20%
+
+    # ISet resistor - 540ohm = 1A to 10.8kohm = 100mA (RISET = 540 / IOUT)
+    iset_resistor = new Resistor
+    iset_resistor.1 ~ ic.ISET
+    iset_resistor.2 ~ ic.VSS
+    # iset_resistor.value = 600ohm +/- 2%
+    iset_resistor.package = "0402"
+
+    # default
+    charge_current = 900mA +/- 10%
+
+    assert 540V / iset_resistor.value within charge_current
+    assert iset_resistor.value within 540ohm to 10.8kohm
+
+    #ISET2 - High: input current 500mA max, Low: input current 100mA max
+    ic.ISET2 ~ ic.IN # set to 500mA
+
+    charge_status.io ~ ic.CHG
+    charge_status.gnd ~ power_in.gnd
+
+    # Optional status LEDs
+    # you need pullups if you want to read the status of the IC
+    # power_good_led = new LEDIndicatorGreen
+    # power_good_led.v_in = 5V +/- 10%
+    # power_good_led.current = 0.5mA to 2mA
+    # power_good_led.input ~ ic.OUT
+    # power_good_led.gnd ~ ic.PG
+
+    # charge_led = new LEDIndicatorBlue
+    # charge_led.v_in = 5V +/- 10%
+    # charge_led.current = 0.5mA to 2mA
+    # charge_led.input ~ ic.OUT
+    # charge_led.gnd ~ ic.CHG
+
+
+component _BQ2404XDSQR:
+    # component BQ24045DSQR
+    footprint = "WSON-10_L2.0-W2.0-P0.40-BL-EP"
+    # lcsc_id = "C148983"
+    # mpn = "C148983"
+    # pins
+    signal IN ~ pin 1
+    signal ISET ~ pin 2
+    signal VSS ~ pin 3
+    signal PRETERM ~ pin 4
+    signal PG ~ pin 5
+    signal NC ~ pin 6
+    signal ISET2 ~ pin 7
+    signal CHG ~ pin 8
+    signal TS ~ pin 9
+    signal OUT ~ pin 10
+    signal EP ~ pin 11
+
+    signal gnd ~ VSS
+    gnd ~ EP
+
+    power_in = new Power
+    power_in.vcc ~ IN
+    power_in.gnd ~ gnd
+
+    power_out = new Power
+    power_out.vcc ~ OUT
+    power_out.gnd ~ gnd

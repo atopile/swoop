@@ -1,0 +1,267 @@
+import Power from "generics/interfaces.ato"
+import SPI from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+
+import Capacitor from "generics/capacitors.ato"
+import Resistor from "generics/resistors.ato"
+import Inductor from "generics/inductors.ato"
+import Crystal from "generics/oscillators.ato"
+import Oscillator from "generics/oscillators.ato"
+
+component _SX1280IMLTRT:
+    # component SX1280IMLTRT
+    footprint = "QFN-24_L4.0-W4.0-P0.50-BL-EP2.6"
+    lcsc_id = "C125969"
+    mpn = "C125969"
+    # pins
+    signal VR_PA ~ pin 1
+    signal VDD_IN ~ pin 2
+    signal NRESET ~ pin 3
+    signal XTA ~ pin 4
+    signal GND ~ pin 5
+    signal XTB ~ pin 6
+    signal BUSY ~ pin 7
+    signal DIO1 ~ pin 8
+    signal DIO2 ~ pin 9
+    signal DIO3 ~ pin 10
+    signal VBAT_IO ~ pin 11
+    signal DCC_FB ~ pin 12
+    GND ~ pin 13
+    signal DCC_SW ~ pin 14
+    signal VBAT ~ pin 15
+    signal MISO_TX ~ pin 16
+    signal MOSI_RX ~ pin 17
+    signal SCK_RTSN ~ pin 18
+    signal NSS_CTS ~ pin 19
+    GND ~ pin 20
+    GND ~ pin 21
+    signal RFIO ~ pin 22
+    GND ~ pin 23
+    GND ~ pin 24
+    GND ~ pin 25
+
+    # Power amplifier supply voltage
+    power_vrpa = new Power
+    power_vrpa.vcc ~ VR_PA
+    power_vrpa.gnd ~ GND
+
+    # Digital supply voltage
+    power_vdd_in = new Power
+    power_vdd_in.vcc ~ VDD_IN
+    power_vdd_in.gnd ~ GND
+
+    # Input supply voltage 1.7-3.7V
+    power_vbat = new Power
+    power_vbat.vcc ~ VBAT
+    power_vbat.gnd ~ GND
+
+    power_vbat_io = new Power
+    power_vbat_io.vcc ~ VBAT_IO
+    power_vbat_io.gnd ~ GND
+
+    # Internal regulated voltage
+    power_dcc_fb = new Power
+    power_dcc_fb.vcc ~ DCC_FB
+    power_dcc_fb.gnd ~ GND
+
+    # spi
+    spi = new SPI
+    spi.mosi ~ MOSI_RX
+    spi.miso ~ MISO_TX
+    spi.sck ~ SCK_RTSN
+    spi.cs ~ NSS_CTS
+
+    feed = new Pair
+    feed.io ~ RFIO
+    feed.gnd ~ GND
+
+
+module SX1280:
+    # radio
+    ic = new _SX1280IMLTRT
+    power = new Power
+    spi = new SPI
+    rf = new Pair
+    data1 = new Pair
+    data2 = new Pair
+    data3 = new Pair
+    busy = new Pair
+    reset = new Pair
+
+    _feed = new Pair
+
+    # Power connections
+    power ~ ic.power_vbat
+    power ~ ic.power_vbat_io
+    ic.power_dcc_fb ~ ic.power_vdd_in
+
+    # RF output from IC
+    _feed ~ ic.feed
+
+    # Data
+    spi ~ ic.spi
+
+    # Control signals
+    data1.io ~ ic.DIO1
+    data2.io ~ ic.DIO2
+    data3.io ~ ic.DIO3
+    busy.io ~ ic.BUSY
+    reset.io ~ ic.NRESET
+
+    power.gnd ~ data1.gnd
+    power.gnd ~ data2.gnd
+    power.gnd ~ data3.gnd
+    power.gnd ~ busy.gnd
+    power.gnd ~ reset.gnd
+
+    # Oscillator
+    oscillator = new Oscillator
+    oscillator.xin.io ~ ic.XTA
+    oscillator.xout.io ~ ic.XTB
+    oscillator.gnd ~ power.gnd
+
+    # Replace crystal with 52MHz 10ppm 11pF
+    oscillator.crystal -> _7D052000K01
+
+    oscillator.load_cap_1.value = 11pF +/- 20%
+    oscillator.load_cap_2.value = 11pF +/- 20%
+
+    # bypass caps
+    dcc_fb_cap = new Capacitor
+    dcc_fb_cap.power ~ ic.power_dcc_fb
+    dcc_fb_cap.package = "0402"
+    dcc_fb_cap.value = 470nF +/- 20%
+
+    vbat_cap = new Capacitor
+    vbat_cap.power ~ ic.power_vbat
+    vbat_cap.package = "0402"
+    vbat_cap.value = 100nF +/- 20%
+
+    vbat_io_cap = new Capacitor
+    vbat_io_cap.power ~ ic.power_vbat_io
+    vbat_io_cap.package = "0402"
+    vbat_io_cap.value = 100nF +/- 20%
+
+    vdd_in_cap = new Capacitor
+    vdd_in_cap.power ~ ic.power_vdd_in
+    vdd_in_cap.package = "0402"
+    vdd_in_cap.value = 10nF +/- 20%
+
+    vrpa_cap = new Capacitor
+    vrpa_cap.power ~ ic.power_vrpa
+    vrpa_cap.package = "0402"
+    vrpa_cap.value = 10nF +/- 20%
+
+    # RF: feed -> matching circuit -> pi filter -> decoupling cap -> antenna
+    matching_circuit = new MatchingCircuit
+    pi_filter = new PIFilter
+    decoupling_cap = new Capacitor
+    antenna = new UFLConnector
+
+    decoupling_cap.value = 100pF +/- 5%
+    decoupling_cap.package = "0402"
+
+    # RF connections
+    _feed ~ matching_circuit.input
+    matching_circuit.output ~ pi_filter.input
+    pi_filter.output.io ~ decoupling_cap.1
+    decoupling_cap.2 ~ antenna.input.io
+
+    antenna.input.gnd ~ power.gnd
+
+
+module PIFilter:
+    input = new Pair
+    output = new Pair
+
+    c1 = new Capacitor
+    c2 = new Capacitor
+    c4 = new Capacitor
+    l2 = new Inductor
+
+    input.gnd ~ output.gnd
+
+    l2 -> _LQW15AN2N5B00D
+
+    c1.package = "0402"
+    c2.package = "0402"
+    c4.package = "0402"
+
+    c1.value = 1.2pF +/- 10%
+    c2.value = 1.2pF +/- 10%
+    c4.value = 0.5pF +/- 10%
+
+    # C4 and L2 are in parallel
+    input.io ~ c4.1
+    c4.2 ~ output.io
+
+    input.io ~ l2.p1
+    l2.p2 ~ output.io
+
+    # C1 is input cap, C2 is output cap
+    input.io ~ c1.1
+    input.gnd ~ c1.2
+
+    output.io ~ c2.1
+    output.gnd ~ c2.2
+
+
+
+component _7D052000K01 from Crystal:
+    # component 7D052000K01
+    footprint = "OSC-SMD_4P-L2.0-W1.6-BL"
+    lcsc_id = "C781784"
+    mpn = "C781784"
+    # pins
+    xin ~ pin 1
+    xout ~ pin 3
+    gnd ~ pin 4
+    gnd ~ pin 2
+
+component _LQW15AN3N0B00D from Inductor:
+    # component LQW15AN3N0B00D
+    footprint = "L0402"
+    lcsc_id = "C269824"
+    mpn = "C269824"
+    # pins
+    p1 ~ pin 1
+    p2 ~ pin 2
+
+component _LQW15AN2N5B00D from Inductor:
+    # component LQW15AN2N5B00D
+    footprint = "L0402"
+    lcsc_id = "C237342"
+    mpn = "C237342"
+    # pins
+    p1 ~ pin 1
+    p2 ~ pin 2
+
+component UFLConnector:
+    # component BWU.FL-IPEX1
+    footprint = "IPEX-SMD_BWIPX-1-001E"
+    lcsc_id = "C5137195"
+    mpn = "C5137195"
+    # pins
+    input = new Pair
+    input.io ~ pin 1
+    input.gnd ~ pin 2
+    input.gnd ~ pin 3
+
+module MatchingCircuit:
+    input = new Pair
+    output = new Pair
+
+    c0 = new Capacitor
+    c0.package = "0402"
+    l1 = new Inductor
+
+    c0.value = 0.8pF +/- 10%
+    l1 -> _LQW15AN3N0B00D
+
+    input.io ~ l1.p1
+    l1.p2 ~ output.io
+
+    input.io ~ c0.1
+    input.gnd ~ c0.2
+
+    output.gnd ~ input.gnd
