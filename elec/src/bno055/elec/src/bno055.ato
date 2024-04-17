@@ -1,0 +1,126 @@
+import Resistor from "generics/resistors.ato"
+import Capacitor from "generics/capacitors.ato"
+import Power from "generics/interfaces.ato"
+import I2C from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+import Q13FC1350000400 from "Q13FC1350000400.ato"
+
+component _BNO055:
+    # component BNO055
+    footprint = "LGA-28_L5.2-W3.8-P0.50-BL"
+    lcsc_id = "C93216"
+    mpn = "C93216"
+    # pins
+    signal PIN1 ~ pin 1
+    signal GND ~ pin 2
+    signal VDD ~ pin 3
+    signal nBOOT_LOAD_PIN ~ pin 4
+    signal PS1 ~ pin 5
+    signal PS0 ~ pin 6
+    signal PIN7 ~ pin 7
+    signal PIN8 ~ pin 8
+    signal CAP ~ pin 9
+    signal BL_IND ~ pin 10
+    signal nRESET ~ pin 11
+    signal PIN12 ~ pin 12
+    signal PIN13 ~ pin 13
+    signal INT ~ pin 14
+    signal PIN15 ~ pin 15
+    signal PIN16 ~ pin 16
+    signal COM3 ~ pin 17
+    signal COM2 ~ pin 18
+    signal COM1 ~ pin 19
+    signal COM0 ~ pin 20
+    signal PIN21 ~ pin 21
+    signal PIN22 ~ pin 22
+    signal PIN23 ~ pin 23
+    signal PIN24 ~ pin 24
+    signal GNDIO ~ pin 25
+    signal XOUT32 ~ pin 26
+    signal XIN32 ~ pin 27
+    signal VDDIO ~ pin 28
+
+    GND ~ BL_IND
+    GND ~ PIN15
+    GND ~ PIN16
+
+    power_vdd = new Power
+    power_vdd.vcc ~ VDD
+    power_vdd.gnd ~ GND
+
+    power_vddio = new Power
+    power_vddio.vcc ~ VDDIO
+    power_vddio.gnd ~ GNDIO
+
+    i2c = new I2C
+    i2c.sda ~ COM0
+    i2c.scl ~ COM1
+
+module BNO055:
+    ic = new _BNO055
+    i2c = new I2C
+    power = new Power
+    interrupt = new Pair
+    # Connect IC power interfaces to the power rails
+    power ~ ic.power_vdd
+    power ~ ic.power_vddio
+
+    # pass through I2C
+    i2c ~ ic.i2c
+
+    cap_vdd_100n = new Capacitor
+    cap_vdd_100n.value = 100nF +/- 20%
+    cap_vdd_100n.package = "0402"
+    cap_vdd_100n.power ~ power
+
+    cap_vdd_1u = new Capacitor
+    cap_vdd_1u.value = 1uF +/- 20%
+    cap_vdd_1u.package = "0402"
+    cap_vdd_1u.power ~ power
+
+    cap_1 = new Capacitor
+    cap_1.value = 100nF +/- 20%
+    cap_1.package = "0402"
+    ic.CAP ~ cap_1.1; cap_1.2 ~ ic.GND
+
+    addr_resistor = new Resistor
+    addr_resistor.value = 10kohm +/- 10%
+    addr_resistor.package = "0402"
+    ic.COM3 ~ addr_resistor.1; addr_resistor.2 ~ ic.GND
+
+    ps0_resistor = new Resistor
+    ps0_resistor.value = 10kohm +/- 10%
+    ps0_resistor.package = "0402"
+    ic.PS0 ~ ps0_resistor.1; ps0_resistor.2 ~ ic.GND
+
+    ps1_resistor = new Resistor
+    ps1_resistor.value = 10kohm +/- 10%
+    ps1_resistor.package = "0402"
+    ic.PS1 ~ ps1_resistor.1; ps1_resistor.2 ~ ic.GND
+
+    crystal = new Q13FC1350000400
+
+    crystal_cap1 = new Capacitor
+    crystal_cap1.value = 22pF +/- 20%
+    crystal_cap1.package = "0402"
+
+    crystal_cap2 = new Capacitor
+    crystal_cap2.value = 22pF +/- 20%
+    crystal_cap2.package = "0402"
+
+    crystal.xin ~ crystal_cap1.1; crystal_cap1.2 ~ ic.GND
+    crystal.xout ~ crystal_cap2.1; crystal_cap2.2 ~ ic.GND
+
+    # connect to IC
+    ic.XIN32 ~ crystal.xin
+    ic.XOUT32 ~ crystal.xout
+
+    # Nboot pin
+    ic.nBOOT_LOAD_PIN ~ power.vcc
+
+    # Coms2
+    ic.COM2 ~ power.gnd
+
+    # Interrupt
+    interrupt.io ~ ic.INT
+    interrupt.gnd ~ power.gnd

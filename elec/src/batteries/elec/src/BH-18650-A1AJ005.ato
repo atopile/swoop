@@ -1,0 +1,8 @@
+component BH_18650_A1AJ005:
+    # component BH-18650-A1AJ005
+    footprint = "BAT-TH_BH-18650-A1AJ005"
+    lcsc_id = "C5290176"
+    # pins
+    signal _1 ~ pin 1
+    signal _2 ~ pin 2
+

@@ -1,0 +1,6 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/lis3mdltr.ato:LIS3MDLTR
+dependencies:
+- generics

@@ -1,0 +1,6 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/drv2605ldgsr.ato:DRV2605
+dependencies:
+- generics

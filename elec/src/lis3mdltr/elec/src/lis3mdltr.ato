@@ -1,0 +1,98 @@
+import Power from "generics/interfaces.ato"
+import I2C from "generics/interfaces.ato"
+import SPI from "generics/interfaces.ato"
+import Pair from "generics/interfaces.ato"
+import Resistor from "generics/resistors.ato"
+import Capacitor from "generics/capacitors.ato"
+
+
+component _LIS3MDLTR:
+    # component LIS3MDLTR
+    footprint = "LGA-12_L2.0-W2.0-P0.50-BL"
+    lcsc_id = "C478483"
+    mpn = "C478483"
+    # pins
+    signal SCL_SPC ~ pin 1
+    signal Res ~ pin 2
+    signal GND ~ pin 3
+    signal C1 ~ pin 4
+    signal Vdd ~ pin 5
+    signal Vdd_IO ~ pin 6
+    signal INT ~ pin 7
+    signal DRDY ~ pin 8
+    signal SD0_SA1 ~ pin 9
+    signal CS ~ pin 10
+    signal SDA_SDI_SDO ~ pin 11
+    Res ~ pin 12
+
+    # per datasheet, connect Reserved pins to gnd
+    GND ~ Res
+
+    power_vdd = new Power
+    power_vdd.vcc ~ Vdd
+    power_vdd.gnd ~ GND
+
+    power_vdd_io = new Power
+    power_vdd_io.vcc ~ Vdd_IO
+    power_vdd_io.gnd ~ GND
+
+    i2c = new I2C
+    i2c.scl ~ SCL_SPC
+    i2c.sda ~ SDA_SDI_SDO
+    i2c.gnd ~ GND
+
+    spi = new SPI
+    spi.sck ~ SCL_SPC
+    spi.miso ~ SD0_SA1
+    spi.mosi ~ SDA_SDI_SDO
+    spi.cs ~ CS
+    spi.gnd ~ GND
+
+module LIS3MDLTR:
+    ic = new _LIS3MDLTR
+    power = new Power
+    power ~ ic.power_vdd
+    power ~ ic.power_vdd_io
+
+    interrupt = new Pair
+    interrupt.io ~ ic.INT
+    interrupt.gnd ~ power.gnd
+
+    data_ready = new Pair
+    data_ready.io ~ ic.DRDY
+    data_ready.gnd ~ power.gnd
+
+    i2c = new I2C
+    i2c ~ ic.i2c
+
+    # select I2C mode by pulling ic.CS high
+    ic.CS ~ power.vcc
+
+    # set I2C address
+    # 0x1C when the SDO/SA1 pin is connected to ground (0011100b).
+    # 0x1E when the SDO/SA1 pin is connected to the voltage supply (0011110b).
+
+    addr_resistor = new Resistor
+    addr_resistor.value = 1kohm +/- 20%
+    addr_resistor.package = "0402"
+    ic.SD0_SA1 ~ addr_resistor.1; addr_resistor.2 ~ power.gnd
+
+    spi = new SPI
+    spi ~ ic.spi
+
+    # bypass caps
+    c1 = new Capacitor
+    c1.1 ~ ic.C1
+    c1.2 ~ power.gnd
+    c1.value = 100nF +/- 20%
+    c1.package = "0402"
+
+    bypass_1 = new Capacitor
+    bypass_1.power ~ power
+    bypass_1.value = 1uF +/- 20%
+    bypass_1.package = "0402"
+
+    bypass_2 = new Capacitor
+    bypass_2.power ~ power
+    bypass_2.value = 100nF +/- 20%
+    bypass_2.package = "0402"

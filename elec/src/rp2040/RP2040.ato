@@ -1,0 +1,128 @@
+from "generics/interfaces.ato" import I2C, SPI, UART, USB2, QSPI, Power
+
+component RP2040:
+    signal iovdd ~ pin 1
+    iovdd ~ pin 10
+    iovdd ~ pin 22
+    iovdd ~ pin 33
+    iovdd ~ pin 42
+    iovdd ~ pin 49
+
+    signal usb_vdd ~ pin 48
+    signal dvdd ~ pin 23
+    dvdd ~ pin 50
+
+    signal testen ~ pin 19
+
+    signal xin ~ pin 20
+    signal xout ~ pin 21
+
+    signal swclk ~ pin 24
+    signal swdio ~ pin 25
+
+    signal run ~ pin 26
+
+    signal adc_avdd ~ pin 43
+
+    signal vreg_vin ~ pin 44
+    signal vreg_vout ~ pin 45
+
+    signal usb_dm ~ pin 46
+    signal usb_dp ~ pin 47
+
+    signal qspi_sd3 ~ pin 51
+    signal qspi_sclk ~ pin 52
+    signal qspi_sd0 ~ pin 53
+    signal qspi_sd2 ~ pin 54
+    signal qspi_sd1 ~ pin 55
+    signal qspi_ss_n ~ pin 56
+
+    signal gpio0 ~ pin 2
+    signal gpio1 ~ pin 3
+    signal gpio2 ~ pin 4
+    signal gpio3 ~ pin 5
+    signal gpio4 ~ pin 6
+    signal gpio5 ~ pin 7
+    signal gpio6 ~ pin 8
+    signal gpio7 ~ pin 9
+    signal gpio8 ~ pin 11
+    signal gpio9 ~ pin 12
+    signal gpio10 ~ pin 13
+    signal gpio11 ~ pin 14
+    signal gpio12 ~ pin 15
+    signal gpio13 ~ pin 16
+    signal gpio14 ~ pin 17
+    signal gpio15 ~ pin 18
+    signal gpio16 ~ pin 27
+    signal gpio17 ~ pin 28
+    signal gpio18 ~ pin 29
+    signal gpio19 ~ pin 30
+    signal gpio20 ~ pin 31
+    signal gpio21 ~ pin 32
+    signal gpio22 ~ pin 34
+    signal gpio23 ~ pin 35
+    signal gpio24 ~ pin 36
+    signal gpio25 ~ pin 37
+    signal gpio26_a0 ~ pin 38
+    signal gpio27_a1 ~ pin 39
+    signal gpio28_a2 ~ pin 40
+    signal gpio29_a3 ~ pin 41
+
+    signal gnd ~ pin 57
+
+    # The TESTEN pin is used for factory testing and should be tied to GND
+    gnd ~ testen
+
+    # USB phy power is a nominal 3v3
+    # But can be tied to IOVDD is USB is not used
+    usb_phy_power = new Power
+    usb_phy_power.vcc ~ usb_vdd
+    usb_phy_power.gnd ~ gnd
+
+    # IOVDD is a nominal 3v3
+    iovdd_power = new Power
+    iovdd_power.vcc ~ iovdd
+    iovdd_power.vcc ~ adc_avdd
+    iovdd_power.gnd ~ gnd
+
+    # I2C interface
+    i2c = new I2C
+    i2c.sda ~ gpio20
+    i2c.scl ~ gpio21
+
+    # UART interface
+    uart = new UART
+    uart.tx ~ gpio4
+    uart.rx ~ gpio5
+
+    # SPI interface
+    spi = new SPI
+    spi.cs ~ gpio9
+    spi.mosi ~ gpio11
+    spi.miso ~ gpio8
+    spi.sck ~ gpio10
+
+    spi1 = new SPI
+    spi1.cs ~ gpio7
+    spi1.mosi ~ gpio11
+    spi1.miso ~ gpio8
+    spi1.sck ~ gpio10
+
+    # QSPI interface
+    qspi = new QSPI
+    qspi.cs ~ qspi_ss_n
+    qspi.sck ~ qspi_sclk
+    qspi.io0 ~ qspi_sd0
+    qspi.io1 ~ qspi_sd1
+    qspi.io2 ~ qspi_sd2
+    qspi.io3 ~ qspi_sd3
+
+    # USB interface
+    usb2 = new USB2
+    usb2.dp ~ usb_dp
+    usb2.dm ~ usb_dm
+
+    footprint = "LQFN-56_L7.0-W7.0-P0.4-EP"
+    mpn = "C2040"
+
+    designator_prefix = "U"
