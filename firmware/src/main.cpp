@@ -1,135 +1,237 @@
 #include <Arduino.h>
+#include "main.h"
 #include <Wire.h>
-#include "BMI088.h"
-#include "LIS3MDL.h"
-#include "SensorFusion.h"
-// This demo explores two reports (SH2_ARVR_STABILIZED_RV and SH2_GYRO_INTEGRATED_RV) both can be used to give
-// quartenion and euler (yaw, pitch roll) angles.  Toggle the FAST_MODE define to see other report.
-// Note sensorValue.status gives calibration accuracy (which improves over time)
-#include <Adafruit_BNO08x.h>
+#include <Adafruit_LIS3MDL.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <SensorFusion.h>
+#include "Adafruit_DRV2605.h"
+#include <FastLED.h>
 
-// #define FAST_MODE
+// constants
+#define LONG_PRESS_TIME 2000 // Long press duration in milliseconds
+#define NUM_LEDS 4
 
-// For SPI mode, we also need a RESET
-// #define BNO08X_RESET 5
-// but not for I2C or UART
-#define BNO08X_RESET -1
+// Sensors
+Adafruit_LIS3MDL mag;
+Adafruit_MPU6050 mpu;
 
-struct euler_t
-{
-	float yaw;
-	float pitch;
-	float roll;
-} ypr;
+// Haptic Driver
+Adafruit_DRV2605 haptic;
 
-Adafruit_BNO08x bno08x(BNO08X_RESET);
-sh2_SensorValue_t sensorValue;
+// Sensor Fusion
+SF fusion;
 
-#ifdef FAST_MODE
-// Top frequency is reported to be 1000Hz (but freq is somewhat variable)
-sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
-long reportIntervalUs = 2000;
-#else
-// Top frequency is about 250Hz but this report is more accurate
-sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
-long reportIntervalUs = 5000;
-#endif
-void setReports(sh2_SensorId_t reportType, long report_interval)
-{
-	Serial.println("Setting desired reports");
-	if (!bno08x.enableReport(reportType, report_interval))
-	{
-		Serial.println("Could not enable stabilized remote vector");
-	}
+// LED Strip
+CRGB leds[NUM_LEDS];
+
+
+
+// Variables
+float gx, gy, gz, ax, ay, az, mx, my, mz;
+float pitch, roll, yaw, throttle;
+float deltat;
+volatile int flightMode = 1; // Starts at mode 1
+unsigned long buttonPressTime = 0;
+bool buttonState = false;
+bool lastButtonState = false;
+bool deviceState = false;
+
+
+float getThrottle() {
+  int rawValue = analogRead(A0); // Assuming A0 is the throttle input pin
+  float throttle = map(rawValue, 730, 200, 0, 100);
+  throttle = constrain(throttle, 0, 100); // Ensuring throttle stays within bounds
+  return throttle;
 }
 
-void setup(void)
-{
+void animatePowerOn(int percentage) {
+  const CRGB lowPowerColor = CRGB::Black;
+  CRGB highPowerColor = CRGB::Green;
 
-	Serial.begin(115200);
-	while (!Serial)
-		delay(10); // will pause Zero, Leonardo, etc until serial console opens
+  if (deviceState) {
+    highPowerColor = CRGB::Red;
+  }
 
-	Serial.println("Adafruit BNO08x test!");
+  // Calculate how many LEDs should be lit based on the percentage
+  int numLedsLit = (percentage * NUM_LEDS) / 100;
+  int remainder = (percentage * NUM_LEDS) % 100; // For partial LED coloring
 
-	// Try to initialize!
-	Wire.setSDA(20);
-	Wire.setSCL(21);
-	while (!bno08x.begin_I2C(0x4A))
-	{
-		Serial.println("Failed to find BNO08x chip");
-		delay(1000);
-	}
-	Serial.println("BNO08x Found!");
+  for (int i = 0; i < NUM_LEDS; i++) {
+    if (i < numLedsLit) {
+      // These LEDs are fully powered/on
+      leds[i] = highPowerColor;
+    } else if (i == numLedsLit && remainder != 0) {
+      // This LED is partially lit based on the remainder, mix colors
+      float mixRatio = remainder / 100.0;
+      leds[i] = blend(lowPowerColor, highPowerColor, mixRatio * 255);
+    } else {
+      // These LEDs are off/low power
+      leds[i] = lowPowerColor;
+    }
+  }
 
-	setReports(reportType, reportIntervalUs);
-
-	Serial.println("Reading events");
-	delay(100);
+  FastLED.show();
 }
 
-void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t *ypr, bool degrees = false)
-{
+void updateLEDs() {
+  if(digitalRead(POWER_BUTTON_PIN) == LOW){
+    FastLED.show();
+    return;
+  }
 
-	float sqr = sq(qr);
-	float sqi = sq(qi);
-	float sqj = sq(qj);
-	float sqk = sq(qk);
+  if (!deviceState) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB::Black; // Turn off all LEDs
+    }
+    FastLED.show();
+    return;
+  }
+  else {
+    leds[0] = CRGB::Green;
+  }
+  leds[0] = CRGB::Green;
+  FastLED.show();
 
-	ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
-	ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
-	ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
-
-	if (degrees)
-	{
-		ypr->yaw *= RAD_TO_DEG;
-		ypr->pitch *= RAD_TO_DEG;
-		ypr->roll *= RAD_TO_DEG;
-	}
+  switch (flightMode) {
+    case 1:
+      // Serial.println(">Flight Mode: 1");
+      leds[1] = CRGB::Blue;
+      leds[2] = CRGB::Black; // LED 3 off
+      leds[3] = CRGB::Black; // LED 4 off
+      FastLED.show();
+      break;
+    case 2:
+      // Serial.println(">Flight Mode: 2");
+      leds[1] = CRGB::Black; // LED 2 off
+      leds[2] = CRGB::Blue;
+      leds[3] = CRGB::Black; // LED 4 off
+      FastLED.show();
+      break;
+    case 3:
+      // Serial.println(">Flight Mode: 3");
+      leds[1] = CRGB::Black; // LED 2 off
+      leds[2] = CRGB::Black; // LED 3 off
+      leds[3] = CRGB::Blue;
+      FastLED.show();
+      break;
+  }
 }
 
-void quaternionToEulerRV(sh2_RotationVectorWAcc_t *rotational_vector, euler_t *ypr, bool degrees = false)
-{
-	quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+void changeFlightMode() {
+  // Function to change the flight mode of the drone
+  // This function is called when the MENU button is pressed
+  // It cycles through the flight modes (1, 2, 3) and updates the LEDs accordingly
+  static unsigned long lastChangeTime = 0;
+  unsigned long currentTime = millis();
+  if (currentTime - lastChangeTime < 200) {
+    return; // Exit the function if it's been less than 200ms since the last change
+  }
+  lastChangeTime = currentTime; // Update the last change time
+  flightMode = flightMode % 3 + 1; // Cycles through 1, 2, 3 and wraps around
+  updateLEDs();
 }
 
-void quaternionToEulerGI(sh2_GyroIntegratedRV_t *rotational_vector, euler_t *ypr, bool degrees = false)
-{
-	quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+void nonBlockingButtonCheck() {
+  // Starts a timer if button is pressed, resets if released
+  buttonState = digitalRead(POWER_BUTTON_PIN);
+  // Serial.print("Button state: "); Serial.println(buttonState ? "HIGH" : "LOW");
+
+  // if the button is being pressed, and the timer is not running, start the timer
+  if (buttonState == LOW ) {
+    Serial.println("Button is pressed.");
+    if (buttonPressTime == 0){
+      buttonPressTime = millis();
+      Serial.println("Timer started.");
+    }
+    else if (millis() - buttonPressTime > LONG_PRESS_TIME) {
+      // If the button is pressed for LONG_PRESS_TIME, toggle the device state
+      deviceState = !deviceState;
+      Serial.print("Device state toggled to: "); Serial.println(deviceState ? "ON" : "OFF");
+      buttonPressTime = 0;
+    }
+    else {
+      // update the led strip based on the percentage of time the button has been pressed
+      int percentage = (millis() - buttonPressTime) * 100 / LONG_PRESS_TIME;
+      Serial.print("Button hold percentage: "); Serial.println(percentage);
+      animatePowerOn(percentage);
+    }
+  }
+  // else, if the button is not pressed, reset the timer to 0
+  else if (buttonState == HIGH) {
+    if (buttonPressTime != 0) {
+      Serial.println("Button released. Timer reset.");
+    }
+    buttonPressTime = 0;
+  }
+
+  lastButtonState = buttonState;
+
 }
 
-void loop()
-{
 
-	if (bno08x.wasReset())
-	{
-		Serial.print("sensor was reset ");
-		setReports(reportType, reportIntervalUs);
-	}
+void setup() {
+  // Setup Serial
+  Serial.begin(115200);
+  // while (!Serial); delay(10);
 
-	if (bno08x.getSensorEvent(&sensorValue))
-	{
-		// in this demo only one report type will be received depending on FAST_MODE define (above)
-		switch (sensorValue.sensorId)
-		{
-		case SH2_ARVR_STABILIZED_RV:
-			quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-		case SH2_GYRO_INTEGRATED_RV:
-			// faster (more noise?)
-			quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-			break;
-		}
-		static long last = 0;
-		long now = micros();
-		Serial.print(now - last);
-		Serial.print("\t");
-		last = now;
-		Serial.print(sensorValue.status);
-		Serial.print("\t"); // This is accuracy in the range of 0 to 3
-		Serial.print(ypr.yaw);
-		Serial.print("\t");
-		Serial.print(ypr.pitch);
-		Serial.print("\t");
-		Serial.println(ypr.roll);
-	}
+  Serial.println("Adafruit LIS3MDL test!");
+
+  // Setup LEDs
+  FastLED.addLeds<NEOPIXEL, LED_DATA_OUT_PIN>(leds, NUM_LEDS);
+  updateLEDs();
+
+  // Setup Buttons
+  pinMode(MENU_BUTTON_PIN, INPUT_PULLUP); // Set the button pin as input with pull-up
+  attachInterrupt(digitalPinToInterrupt(MENU_BUTTON_PIN), changeFlightMode, FALLING); // Attach interrupt for button press
+
+
+  // // Setup I2C
+  Wire.setSCL(I2C_SDA_PIN);
+  Wire.setSDA(I2C_SCL_PIN);
+
+  Wire.begin();
+
+  mag.begin_I2C(LIS3MDLTR_ADDRESS, &Wire);
+  mpu.begin(MPU6050_ADDRESS, &Wire);
+}
+
+void loop() {
+  nonBlockingButtonCheck();
+  updateLEDs();
+
+  if (!deviceState) {
+    Serial.println("Device is powered off.");
+    return;
+  }
+
+
+  mag.read();
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+
+  deltat = fusion.deltatUpdate();
+  // the chips are in different orientation. Following both of those
+  // mag datasheet: https://www.mouser.com/datasheet/2/389/lis3mdl-1849592.pdf
+  // mpu datasheet: https://www.cdiweb.com/datasheets/invensense/mpu_6500_rev1.0.pdf
+  fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, -mag.y, mag.x, mag.z, deltat);
+
+  // pitch = fusion.getPitch();
+  // roll = fusion.getRoll();    //you could also use getRollRadians() ecc
+  // yaw = fusion.getYaw();
+  throttle = getThrottle();
+
+  float* quat = fusion.getQuat();
+  Serial.print("w"); Serial.print(quat[0]);Serial.print("w");
+  Serial.print("a"); Serial.print(quat[1]);Serial.print("a");
+  Serial.print("b"); Serial.print(quat[2]);Serial.print("b");
+  Serial.print("c"); Serial.print(quat[3]);Serial.println("c");
+  // Serial.print(">Throttle:\t"); Serial.println(throttle);
+  // Serial.println();
+
+  // animatePowerOn(throttle);
+
+  delay(10);
+
 }
