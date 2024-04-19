@@ -38,8 +38,6 @@ def main():
     pygame.display.set_caption("PyTeapot IMU orientation visualization")
     resizewin(640, 480)
     init()
-    frames = 0
-    ticks = pygame.time.get_ticks()
 
     global input_quaternion
     global sensor_off_quat
@@ -48,14 +46,17 @@ def main():
         event = pygame.event.poll()
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             break
+
+        # We read the quaternion coming from the remote
         input_quaternion = read_data()
+        # We realign the sensor in line with the remote
         sensor_off_quat = sensor_offset_quaternion * input_quaternion * sensor_offset_quaternion.conjugate()
+        # We zero the quaternion based on the control position (set through button press)
         compute_quaternion = zero_quaternion * sensor_off_quat
-        #sensor_off_quat = input_quaternion
+        # We draw on screen
         draw(compute_quaternion)
 
         pygame.display.flip()
-        frames += 1
 
     ser.close()
 
