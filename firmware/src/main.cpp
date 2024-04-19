@@ -130,6 +130,7 @@ void changeFlightMode() {
   lastChangeTime = currentTime; // Update the last change time
   flightMode = flightMode % 3 + 1; // Cycles through 1, 2, 3 and wraps around
   updateLEDs();
+  Serial.println("save");
 }
 
 void nonBlockingButtonCheck() {
@@ -215,7 +216,7 @@ void loop() {
   // the chips are in different orientation. Following both of those
   // mag datasheet: https://www.mouser.com/datasheet/2/389/lis3mdl-1849592.pdf
   // mpu datasheet: https://www.cdiweb.com/datasheets/invensense/mpu_6500_rev1.0.pdf
-  fusion.MadgwickUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, -mag.y, mag.x, mag.z, deltat);
+  fusion.MahonyUpdate(g.gyro.x, g.gyro.y, g.gyro.z, a.acceleration.x, a.acceleration.y, a.acceleration.z, deltat);
 
   // pitch = fusion.getPitch();
   // roll = fusion.getRoll();    //you could also use getRollRadians() ecc
@@ -227,6 +228,24 @@ void loop() {
   Serial.print("a"); Serial.print(quat[1]);Serial.print("a");
   Serial.print("b"); Serial.print(quat[2]);Serial.print("b");
   Serial.print("c"); Serial.print(quat[3]);Serial.println("c");
+  // Serial.print(">gx:");
+  // Serial.println(g.gyro.x);
+  // Serial.print(">gy:");
+  // Serial.println(g.gyro.y);
+  // Serial.print(">gz:");
+  // Serial.println(g.gyro.z);
+  // Serial.print(">ax:");
+  // Serial.println(a.acceleration.x);
+  // Serial.print(">ay:");
+  // Serial.println(a.acceleration.y);
+  // Serial.print(">az:");
+  // Serial.println(a.acceleration.z);
+  // Serial.print(">mx:");
+  // Serial.println(mag.x);
+  // Serial.print(">my:");
+  // Serial.println(mag.y);
+  // Serial.print(">mz:");
+  // Serial.println(mag.z);
   // Serial.print(">Throttle:\t"); Serial.println(throttle);
   // Serial.println();
 
