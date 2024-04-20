@@ -224,10 +224,8 @@ void loop() {
   throttle = getThrottle();
 
   float* quat = fusion.getQuat();
-  Serial.print("w"); Serial.print(quat[0]);Serial.print("w");
-  Serial.print("a"); Serial.print(quat[1]);Serial.print("a");
-  Serial.print("b"); Serial.print(quat[2]);Serial.print("b");
-  Serial.print("c"); Serial.print(quat[3]);Serial.println("c");
+  // Serial.print(">dt:");
+  // Serial.println(deltat);
   // Serial.print(">gx:");
   // Serial.println(g.gyro.x);
   // Serial.print(">gy:");
@@ -248,9 +246,18 @@ void loop() {
   // Serial.println(mag.z);
   // Serial.print(">Throttle:\t"); Serial.println(throttle);
   // Serial.println();
+  // print the quaternion
+  Serial.print(">w:");
+  Serial.println(quat[0]);
+  Serial.print(">x:");
+  Serial.println(quat[1]);
+  Serial.print(">y:");
+  Serial.println(quat[2]);
+  Serial.print(">z:");
+  Serial.println(quat[3]);
 
   // animatePowerOn(throttle);
 
-  delay(10);
+  delay(50);
 
 }
