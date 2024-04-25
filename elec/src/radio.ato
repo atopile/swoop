@@ -29,7 +29,7 @@ module Radio:
 
     # Optional: Interface to connect an RGB LED to the radio
     led_do_if = new Pair
-    led_do_if.gnd ~ power.gnd
+    power.gnd ~ led_do_if.gnd
 
     # external connections
     power ~ _micro.power
@@ -38,13 +38,13 @@ module Radio:
     # ESP32
     # UART connections need to be crossed (need a better way to do this)
     # This means people can connect straight to the UART as needed
-    uart.tx ~ _micro.ic.RXD0  # GPIO43
-    uart.rx ~ _micro.ic.TXD0  # GPIO44
+    _micro.ic.RXD0 ~ uart.tx  # GPIO43
+    _micro.ic.TXD0 ~ uart.rx  # GPIO44
     power.gnd ~ uart.gnd
 
     boot_button = new ButtonPullup
     boot_button.btn -> ButtonSKRPACE010
-    _micro.power ~ boot_button.power
+    boot_button.power ~ _micro.power
     boot_button.output.vcc ~ _micro.ic.IO0
 
     _radio.spi.miso ~ _micro.ic.IO15
