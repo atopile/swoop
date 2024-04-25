@@ -12,6 +12,8 @@ This project is fully open source. But one might ask, how can it be open source 
 
 The three rotation axis, yaw, pitch, roll of the remote each control the same control channel on the aircraft. So if you tilt your remote to a certain angle, your aircraft will start rotating in that same direction at a certain rotational speed. That's what makes this controller so intuitive to use! To start using the remote, simply double click the arming button (the larger button). This will zero the controller to the current position and start streaming the control outputs to the receiver.
 
+![yaw, pitch, roll](docs/assets/VECTOR_YPR.jpg)
+
 To control the throttle, which is your aircraft's motor power, simply press the trigger. Inside the controller, a hall sensor precisely keeps track of the trigger position. This makes for a total of four control inputs with yaw, pitch, roll and throttle.
 
 The smaller button on the remote let's you switch the flight mode. Pretty handy to tweak how your aircraft reacts to your control inputs!
@@ -31,7 +33,7 @@ Here is what we are planning for this controller:
 
 ## Documentation
 
-We will update this section as we make progress with the project. In the meantime, 
+We will update this section as we make progress with the project.
 
 ## Join us!
 
