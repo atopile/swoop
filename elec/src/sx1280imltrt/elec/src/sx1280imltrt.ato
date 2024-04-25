@@ -81,7 +81,6 @@ module SX1280:
     ic = new _SX1280IMLTRT
     power = new Power
     spi = new SPI
-    rf = new Pair
     data1 = new Pair
     data2 = new Pair
     data3 = new Pair
@@ -96,7 +95,7 @@ module SX1280:
     ic.power_dcc_fb ~ ic.power_vdd_in
 
     # RF output from IC
-    _feed ~ ic.feed
+    ic.feed ~ _feed
 
     # Data
     spi ~ ic.spi
@@ -167,7 +166,7 @@ module SX1280:
     pi_filter.output.io ~ decoupling_cap.1
     decoupling_cap.2 ~ antenna.input.io
 
-    antenna.input.gnd ~ power.gnd
+    power.gnd ~ antenna.input.gnd
 
 
 module PIFilter:
