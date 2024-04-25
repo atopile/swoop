@@ -42,9 +42,11 @@ We will share documentation once we've made more progress on the project develop
 
 ## Join us!
 
+### Discord
+
 If you are curious about the project, join us on the [atopile discord server](https://discord.gg/nr5V3QRUd3).
 
-## Contributing
+### Contributing
 
 If you would like to contribute on atopile, here is what you will need:
 
