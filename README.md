@@ -33,9 +33,9 @@ Here is what we are planning for this controller:
 - Embedded ExpressLRS transceiver
 - Rechargeable over USB-C
 
-## Documentation
+## Documentation & Status
 
-We will update this section as we make progress with the project.
+We will share documentation once we've made more progress on the project development. For current status, checkout the [product page](https://atopile.io/swoop/).
 
 ## Join us!
 
@@ -51,4 +51,3 @@ For electronics:
 
 For firmware:
 - [PlatformIO](https://platformio.org): Cross platform firmware development toolchain
-- 
