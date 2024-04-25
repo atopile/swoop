@@ -1,5 +1,7 @@
 # swoop
 
+![controller and hand](docs/assets/controller_hand_V3.jpeg)
+
 ## What is swoop🛫?
 
 With swoop, you can fly remote controlled aircraft with the motion of your hand. It's especially fun when flying FPV because the motion of your drone precisely maps to the movement of the remote.
@@ -8,7 +10,7 @@ With swoop, you can fly remote controlled aircraft with the motion of your hand.
 
 This project is fully open source. But one might ask, how can it be open source if "source code" doesn't exist for hardware in the same way that it exists in software with languages like C, Python or Rust? Well, that's why we are designing this remote with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics. With atopile, we can now version control the hardware alongside the firmware, make issues and pull requests, run continuous integration to generate manufacturing files and reuse section of the design. True Open Source Hardware!
 
-## So, how does it work?
+## Here is how it works:
 
 The three rotation axis, yaw, pitch, roll of the remote each control the same control channel on the aircraft. So if you tilt your remote to a certain angle, your aircraft will start rotating in that same direction at a certain rotational speed. That's what makes this controller so intuitive to use! To start using the remote, simply double click the arming button (the larger button). This will zero the controller to the current position and start streaming the control outputs to the receiver.
 
@@ -39,5 +41,14 @@ We will update this section as we make progress with the project.
 
 If you are curious about the project, join us on the [atopile discord server](https://discord.gg/nr5V3QRUd3).
 
-![IMG_7410](https://github.com/atopile/swoop/assets/9785003/696a1b3a-4fe3-41b3-800c-c4fb4323561a)
+## Contributing
 
+If you would like to contribute on atopile, here is what you will need:
+
+For electronics:
+- [atopile](https://atopile.io): here is a guide on how to install it: https://atopile.io/getting-started/
+- [ExpressLRS](https://www.expresslrs.org): ELRS is an open source long range communication protocol for remote controlled aircraft. If you would like to test the remote, having compatible hardware will help!
+
+For firmware:
+- [PlatformIO](https://platformio.org): Cross platform firmware development toolchain
+- 
