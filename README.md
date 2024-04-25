@@ -4,15 +4,18 @@
 
 ## What is swoop🛫?
 
-With swoop, you can fly remote controlled aircraft with the motion of your hand. It's especially fun when flying FPV because the motion of your drone precisely maps to the movement of the remote.
+With swoop, you can fly remote controlled aircraft with the motion of your hand. It's especially fun when flying FPV because the motion of your remote precisely maps to the aircraft.
 
 ## Open Source Hardware..?
 
-This project is fully open source. But one might ask, how can it be open source if "source code" doesn't exist for hardware in the same way that it exists in software with languages like C, Python or Rust? Well, that's why we are designing this remote with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics. With atopile, we can now version control the hardware alongside the firmware, make issues and pull requests, run continuous integration to generate manufacturing files and reuse section of the design. True Open Source Hardware!
+This project is fully open source. But one might ask, how can it be open source if "source code" doesn't exist for hardware? At least, not in the same way that it exists in software with languages like C, Python or Rust?
+Well, that's why we are designing this remote with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics.
+With atopile, we can version control the hardware alongside the firmware, make issues and pull requests, run continuous integration to generate manufacturing files automatically and reuse section of our design. This is true Open Source Hardware!
 
 ## Here is how it works:
 
-The three rotation axis, yaw, pitch, roll of the remote each control the same control channel on the aircraft. So if you tilt your remote to a certain angle, your aircraft will start rotating in that same direction at a certain rotational speed. That's what makes this controller so intuitive to use! To start using the remote, simply double click the arming button (the larger button). This will zero the controller to the current position and start streaming the control outputs to the receiver.
+The three rotation axis, yaw, pitch, roll of the remote each control the same channel on your aircraft. If you tilt your remote to a certain angle, your aircraft will rotate in that same direction with a certain rotational speed. That's what makes this controller so intuitive to use!
+To start using the remote, simply double click the arming button (the larger button). This will zero the controller to the current position and start streaming the control outputs to the receiver.
 
 ![yaw, pitch, roll](docs/assets/VECTOR_YPR.jpg)
 
