@@ -56,3 +56,10 @@ For electronics:
 
 For firmware:
 - [PlatformIO](https://platformio.org): Cross platform firmware development toolchain
+- [CRSF for Arduino](https://github.com/ZZ-Cat/CRSFforArduino): Implementation of the CRSF protocol for arduino. We'll be running this library to stream data from the controller microcontroller to the EzpressLRS module
+- [ExpressLRS](https://www.expresslrs.org): ELRS is an open source long range communication protocol for remote controlled aircraft. Their firmware will be flashed on the embedded ESP32S2 module within the controller.
+
+## Happy Flying!
+
+![swoop_test](https://github.com/atopile/swoop/assets/9785003/c9d3b5ee-8ebb-4658-a885-cb9c77e0162e)
+
