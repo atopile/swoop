@@ -1,0 +1,6 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/drv5053raqdbzr.ato:DRV5053RAQDBZR
+dependencies:
+- generics

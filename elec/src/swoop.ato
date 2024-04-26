@@ -20,6 +20,7 @@ module Swoop:
     radio = new Radio
     ios = new IOs
 
+
     # Comms
     micro.usb2 ~ ios.usb2
     micro.power ~ power3v3
@@ -31,10 +32,9 @@ module Swoop:
     # GPIO
     micro.led_dout ~ ios.led_din
     micro.power_btn ~ ios.power_btn
-    micro.menu_btn_1 ~ ios.menu_btn_1
-    micro.menu_btn_2 ~ ios.menu_btn_2
-    micro.menu_btn_3 ~ ios.menu_btn_3
+    micro.menu_btn ~ ios.menu_btn
     micro.hall_sense ~ ios.hall_sense
+    micro.charge_status ~ power_supply.charge_status
 
     # Regultators
     ios.power5v ~ power_supply.power5v

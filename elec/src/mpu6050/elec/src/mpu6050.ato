@@ -1,0 +1,79 @@
+from "generics/interfaces.ato" import I2C, Power
+from "generics/resistors.ato" import Resistor
+from "generics/capacitors.ato" import Capacitor
+
+module MPU6050:
+    i2c = new I2C
+    power = new Power
+    signal interrupt
+    ic = new _MPU_6050_C24112
+    power.vcc ~ ic.vdd
+    power.gnd ~ ic.gnd
+    power.voltage = 3.3V +/- 20%
+
+    # I2C
+    i2c.sda ~ ic.sda
+    i2c.scl ~ ic.scl
+
+    # Interrupt
+    interrupt ~ ic.int
+    signal address ~ ic.ad0
+    address ~ power.gnd
+
+    # pullup on interrupt
+    interrupt_pullup = new Resistor
+    interrupt_pullup.p1 ~ interrupt
+    interrupt_pullup.p2 ~ power.vcc
+    interrupt_pullup.value = 10kohm +/- 20%
+    interrupt_pullup.footprint = "R0402"
+
+    # I2C pullups
+    sda_pullup = new Resistor
+    scl_pullup = new Resistor
+    sda_pullup.p1 ~ i2c.sda
+    sda_pullup.p2 ~ power.vcc
+    sda_pullup.value = 10kohm +/- 20%
+    sda_pullup.footprint = "R0402"
+    scl_pullup.p1 ~ i2c.scl
+    scl_pullup.p2 ~ power.vcc
+    scl_pullup.value = 10kohm +/- 20%
+    scl_pullup.footprint = "R0402"
+
+    # Random pins that need something
+    power.gnd ~ ic.fsync # FSYNC
+    power.gnd ~ ic.clkin # CLKIN
+    power.gnd ~ ic.ep # thermal pad
+    power.gnd ~ power.gnd
+    power.vcc ~ ic.vlogic # VLOGIC
+
+    # Decoupling capacitors
+    c1 = new Capacitor
+    c1.p1 ~ power.gnd
+    c1.p2 ~ ic.regout
+    c1.value = 100nF +/- 20%
+    c1.footprint = "C0402"
+
+    c2 = new Capacitor
+    c2.p1 ~ power.gnd
+    c2.p2 ~ ic.cpout
+    c2.value = 2.2nF +/- 20%
+    c2.footprint = "C0603"
+
+component _MPU_6050_C24112:
+    footprint = "QFN-24_L4.0-W4.0-P0.50-BL-EP2.7"
+    mpn = "C24112"
+    # pins
+    signal clkin ~ pin 1
+    signal aux_da ~ pin 6
+    signal aux_cl ~ pin 7
+    signal vlogic ~ pin 8
+    signal ad0 ~ pin 9
+    signal regout ~ pin 10
+    signal fsync ~ pin 11
+    signal int ~ pin 12
+    signal vdd ~ pin 13
+    signal gnd ~ pin 18
+    signal cpout ~ pin 20
+    signal scl ~ pin 23
+    signal sda ~ pin 24
+    signal ep ~ pin 25
