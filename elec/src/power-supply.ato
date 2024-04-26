@@ -29,7 +29,7 @@ module PowerSupply:
 
     buckboost.tps_buck_boost.v_in = 2.5V to 4.2V
     buckboost.tps_buck_boost.v_out = 3.6V to 3.9V
-    buckboost.tps_buck_boost.i_q = 1uA to 5uA
+    buckboost.tps_buck_boost.i_q = 1uA to 6uA
 
     power5v ~ charger.power_in
     charger.power_batt ~ battery.power
