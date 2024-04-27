@@ -1,0 +1,6 @@
+ato-version: ^0.2.0
+builds:
+  default:
+    entry: elec/src/mpu6050.ato:MPU6050
+dependencies:
+- generics

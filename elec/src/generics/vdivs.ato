@@ -8,7 +8,6 @@ module VDiv from _VDiv:
     # ratio: None
     v_in: voltage
     v_out: voltage
-    i_q: current
 
     i_q = 100uA to 10mA
 

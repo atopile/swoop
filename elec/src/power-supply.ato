@@ -1,35 +1,55 @@
-import Power from "generics/interfaces.ato"
+from "generics/interfaces.ato" import Pair, Power
 import BatteryJST from "batteries/batteries.ato"
 import AMS111733 from "ams1117-33/elec/src/ams1117-33.ato"
 import TPS63020DSJR from "tps63020dsjr/elec/src/tps63020dsjr.ato"
-import BQ24045DSQR from "bq24045dsqr/elec/src/bq24045dsqr.ato"
+import BQ24040DSQR from "bq24045dsqr/elec/src/bq24045dsqr.ato"
 import Diode from "generics/diodes.ato"
+from "generics/vdivs.ato" import VDivLowPassFilter, VDiv
+from "generics/debug.ato" import TestPoint
 
 module PowerSupply:
     power5v = new Power
     power3v3 = new Power
+    battery_voltage_sense = new Pair
+    charge_status = new Pair
 
     battery = new Battery
     charger = new Charger
     buckboost = new BuckBoost
     ldo = new LDO
+    battery_voltage_sensor = new VDivLowPassFilter
 
-    charger.bq24045.charge_current = 500mA +/- 10%
+
+    # Configure the battery voltage sense
+    battery_voltage_sensor.v_in = 4.2V +/- 1%
+    battery_voltage_sensor.v_out = 3V +/- 1V
+    battery_voltage_sensor.cutoff_frequency = 100Hz +/- 20%
+
+    charger.bq2404x.charge_current = 500mA +/- 10%
 
     buckboost.tps_buck_boost.v_in = 2.5V to 4.2V
-    buckboost.tps_buck_boost.v_out = 3V to 3.4V
-    buckboost.tps_buck_boost.i_q = 1uA to 5uA
-    # add in a diode or between the battery and buck boost (diode just on 5V side)
-    power_or = new DiodeOrUSB
-    power5v ~ power_or.power_usb
-    power_or.power_batt ~ battery.power
+    buckboost.tps_buck_boost.v_out = 3.6V to 3.9V
+    buckboost.tps_buck_boost.i_q = 1uA to 6uA
 
     power5v ~ charger.power_in
     charger.power_batt ~ battery.power
+    battery.power ~ battery_voltage_sensor.power
+    charger.bq2404x.charge_status ~ charge_status
 
-    power_or.power_out ~ buckboost.power_in
+    buckboost.power_in ~ battery.power
     buckboost.power_out ~ ldo.power_in
     ldo.power_out ~ power3v3
+
+    # add test points
+    power5v_tp = new TestPoint
+    power3v3_tp = new TestPoint
+    battery_tp = new TestPoint
+    charger_tp = new TestPoint
+
+    power5v_tp.point ~ power5v.vcc
+    power3v3_tp.point ~ power3v3.vcc
+    battery_tp.point ~ battery.power.vcc
+    charger_tp.point ~ charger.bq2404x.charge_status.io
 
 
 module DiodeOrUSB:
@@ -60,9 +80,9 @@ module Charger:
     power_in = new Power
     power_batt = new Power
 
-    bq24045 = new BQ24045DSQR
-    power_in ~ bq24045.power_in
-    power_batt ~ bq24045.power_batt
+    bq2404x = new BQ24040DSQR
+    power_in ~ bq2404x.power_in
+    power_batt ~ bq2404x.power_batt
 
 module BuckBoost:
     power_in = new Power
@@ -70,9 +90,6 @@ module BuckBoost:
 
     # 2A output buck-boost
     tps_buck_boost = new TPS63020DSJR
-    # tps_buck_boost.power_out.voltage = 3.6V
-    # manually set to 3.6V VOUT (no equations, yet)
-    # tps_buck_boost.feedback_div.r_top.value = 1.1Mohm +/- 5%
     power_in ~ tps_buck_boost.power_in
     power_out ~ tps_buck_boost.power_out
 

@@ -1,7 +1,15 @@
-ato-version: ^0.2.0
+ato-version: ^v0.2.0
 builds:
   default:
     entry: elec/src/swoop.ato:Swoop
   debug:
     entry: elec/src/debug.ato:Debug
-dependencies: []
+dependencies:
+- name: mpu6050
+  version_spec:
+  link_broken: true
+  path: elec/src/mpu6050
+- name: drv5053raqdbzr
+  version_spec:
+  link_broken: true
+  path: elec/src/drv5053raqdbzr
