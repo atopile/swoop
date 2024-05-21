@@ -176,6 +176,8 @@ module PIFilter:
     c1 = new Capacitor
     c2 = new Capacitor
     c4 = new Capacitor
+    c4.mpn = "C88941"
+    c4.footprint = "C0402"
     l2 = new Inductor
 
     input.gnd ~ output.gnd
@@ -255,6 +257,8 @@ module MatchingCircuit:
     l1 = new Inductor
 
     c0.value = 0.8pF +/- 10%
+    c0.mpn = "C76988"
+    c0.footprint = "C0402"
     l1 -> _LQW15AN3N0B00D
 
     input.io ~ l1.p1
