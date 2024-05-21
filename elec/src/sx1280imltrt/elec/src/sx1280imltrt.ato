@@ -176,6 +176,9 @@ module PIFilter:
     c1 = new Capacitor
     c2 = new Capacitor
     c4 = new Capacitor
+    #TODO: fixing the mpn for the moment, we should switch to the johanson baloon in the future
+    c4.mpn = "C88941"
+    c4.footprint = "C0402"
     l2 = new Inductor
 
     input.gnd ~ output.gnd
@@ -255,6 +258,9 @@ module MatchingCircuit:
     l1 = new Inductor
 
     c0.value = 0.8pF +/- 10%
+    #TODO: fixing the mpn for the moment, we should switch to the johanson baloon in the future
+    c0.mpn = "C76988"
+    c0.footprint = "C0402"
     l1 -> _LQW15AN3N0B00D
 
     input.io ~ l1.p1
