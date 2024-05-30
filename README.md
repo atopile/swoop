@@ -2,7 +2,7 @@
 
 ![controller and hand](docs/assets/controller_hand_V3.jpeg)
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/atopile/swoop/pio.yml)
+![Build Status](https://img.shields.io/github/actions/workflow/status/atopile/swoop/pio.yml?label=Firmware%20Status)
 
 ## What is swoop🛫?
 
