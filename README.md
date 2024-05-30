@@ -2,9 +2,20 @@
 
 ![controller and hand](docs/assets/controller_hand_V3.jpeg)
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/atopile/swoop/pio.yml?label=pio%20Firmware)
-
-![Build Status](https://img.shields.io/github/actions/workflow/status/atopile/swoop/ato.yml?label=ato%20Hardware)
+<div align="center">
+    <a href="#">
+        <img src="https://img.shields.io/github/actions/workflow/status/atopile/swoop/pio.yml?label=pio%20Firmware" alt="Version" style="vertical-align:top; margin:6px 4px">
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/github/actions/workflow/status/atopile/swoop/ato.yml?label=ato%20Hardware" alt="License" style="vertical-align:top; margin:6px 4px">
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/github/license/atopile/swoop" alt="Build status" style="vertical-align:top; margin:6px 4px">
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/github/v/release/atopile/swoop" alt="Build status" style="vertical-align:top; margin:6px 4px">
+    </a>
+</div>
 
 ## What is swoop🛫?
 
