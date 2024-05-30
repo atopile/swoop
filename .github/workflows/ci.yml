@@ -1,3 +1,4 @@
+name: atopile CI
 
 on:
   push:

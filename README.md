@@ -2,6 +2,8 @@
 
 ![controller and hand](docs/assets/controller_hand_V3.jpeg)
 
+![Build Status](https://img.shields.io/github/actions/workflow/status/atopile/swoop/pio.yml)
+
 ## What is swoop🛫?
 
 With swoop, you can fly remote controlled aircraft with the motion of your hand. It's especially fun when flying FPV because the motion of your remote precisely maps to the aircraft.
