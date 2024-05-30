@@ -1,0 +1,48 @@
+name: Convert STEP to STL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install FreeCAD
+      run: sudo apt-get install -y freecad
+
+    - name: Convert STEP to STL
+      run: |
+        python -m pip install pyocct
+        for step_file in $(find . -name "*.step" -or -name "*.stp"); do
+          stl_file="${step_file%.*}.stl"
+          python -c "
+import FreeCAD
+import Part
+doc = FreeCAD.open('$step_file')
+objs = doc.Objects
+for obj in objs:
+    shape = obj.Shape
+    stl_file_path = '$stl_file'
+    shape.exportStl(stl_file_path)
+FreeCAD.closeDocument(doc.Name)
+          "
+        done
+
+    - name: Commit STL files
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add **/*.stl
+        git commit -m 'Convert STEP to STL'
+        git push
