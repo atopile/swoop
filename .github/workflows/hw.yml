@@ -17,11 +17,11 @@ jobs:
 
     - name: Search for STEP files and move to artifacts
       run: |
-        mkdir -p 3D-files
-        find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D-files/ \;
+        mkdir -p 3D_files
+        find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D_files/ \;
 
     - name: Upload Combined Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: 3D-files
-          path: 3D-files
+          name: 3D_files
+          path: 3D_files
