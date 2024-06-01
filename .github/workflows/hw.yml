@@ -34,5 +34,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: 3D_files
-        path: 3D_files
+        path: 3D_files/
         if-no-files-found: warn
