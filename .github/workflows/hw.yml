@@ -1,34 +1,27 @@
-name: Convert STEP to STL
+name: 3D files
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  convert:
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.x
+        python-version: '3.x'
 
-    - name: Install FreeCAD
-      run: sudo apt-get install -y freecad
-
-    - name: Convert STEP to STL
+    - name: Search for STEP files and move to artifacts
       run: |
-        python -m pip install pyocct
-        for step_file in $(find . -name "*.step" -or -name "*.stp"); do
-          python convert_step_to_stl.py "$step_file"
-        done
+        mkdir -p artifacts
+        find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D-files/ \;
 
-    - name: Commit STL files
-      run: |
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git add **/*.stl
-        git commit -m 'Convert STEP to STL'
-        git push
+    - name: Upload STEP files as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: step-files
+        path: 3D-files/
