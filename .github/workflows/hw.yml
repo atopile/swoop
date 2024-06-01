@@ -21,7 +21,7 @@ jobs:
         find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D_files/ \;
 
     - name: Upload Combined Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: 3D_files
-          path: 3D_files
+      uses: actions/upload-artifact@v3
+      with:
+        name: 3D_files
+        path: 3D_files
