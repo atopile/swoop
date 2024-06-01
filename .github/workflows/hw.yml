@@ -15,13 +15,24 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: List files in mech directory for debugging
+      run: |
+        echo "Listing contents of mech directory:"
+        find ./mech -type f
+
     - name: Search for STEP files and move to artifacts
       run: |
         mkdir -p 3D_files
         find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D_files/ \;
+
+    - name: List files in 3D_files directory for debugging
+      run: |
+        echo "Listing contents of 3D_files directory:"
+        ls -la 3D_files
 
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: 3D_files
         path: 3D_files
+        if-no-files-found: warn
