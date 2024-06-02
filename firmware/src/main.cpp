@@ -6,11 +6,11 @@
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
 #include "Adafruit_DRV2605.h"
-#include <FastLED.h>
+
+#include "../lib/LED/LED.hpp"
 
 // constants
 #define LONG_PRESS_TIME 2000 // Long press duration in milliseconds
-#define NUM_LEDS 4
 
 // Sensors
 Adafruit_LIS3MDL mag;
@@ -22,10 +22,7 @@ Adafruit_DRV2605 haptic;
 // Sensor Fusion
 SF fusion;
 
-// LED Strip
-CRGB leds[NUM_LEDS];
-
-
+LED led;
 
 // Variables
 float gx, gy, gz, ax, ay, az, mx, my, mz;
@@ -37,85 +34,11 @@ bool buttonState = false;
 bool lastButtonState = false;
 bool deviceState = false;
 
-
 float getThrottle() {
   int rawValue = analogRead(A0); // Assuming A0 is the throttle input pin
   float throttle = map(rawValue, 730, 200, 0, 100);
   throttle = constrain(throttle, 0, 100); // Ensuring throttle stays within bounds
   return throttle;
-}
-
-void animatePowerOn(int percentage) {
-  const CRGB lowPowerColor = CRGB::Black;
-  CRGB highPowerColor = CRGB::Green;
-
-  if (deviceState) {
-    highPowerColor = CRGB::Red;
-  }
-
-  // Calculate how many LEDs should be lit based on the percentage
-  int numLedsLit = (percentage * NUM_LEDS) / 100;
-  int remainder = (percentage * NUM_LEDS) % 100; // For partial LED coloring
-
-  for (int i = 0; i < NUM_LEDS; i++) {
-    if (i < numLedsLit) {
-      // These LEDs are fully powered/on
-      leds[i] = highPowerColor;
-    } else if (i == numLedsLit && remainder != 0) {
-      // This LED is partially lit based on the remainder, mix colors
-      float mixRatio = remainder / 100.0;
-      leds[i] = blend(lowPowerColor, highPowerColor, mixRatio * 255);
-    } else {
-      // These LEDs are off/low power
-      leds[i] = lowPowerColor;
-    }
-  }
-
-  FastLED.show();
-}
-
-void updateLEDs() {
-  if(digitalRead(POWER_BUTTON_PIN) == LOW){
-    FastLED.show();
-    return;
-  }
-
-  if (!deviceState) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB::Black; // Turn off all LEDs
-    }
-    FastLED.show();
-    return;
-  }
-  else {
-    leds[0] = CRGB::Green;
-  }
-  leds[0] = CRGB::Green;
-  FastLED.show();
-
-  switch (flightMode) {
-    case 1:
-      // Serial.println(">Flight Mode: 1");
-      leds[1] = CRGB::Blue;
-      leds[2] = CRGB::Black; // LED 3 off
-      leds[3] = CRGB::Black; // LED 4 off
-      FastLED.show();
-      break;
-    case 2:
-      // Serial.println(">Flight Mode: 2");
-      leds[1] = CRGB::Black; // LED 2 off
-      leds[2] = CRGB::Blue;
-      leds[3] = CRGB::Black; // LED 4 off
-      FastLED.show();
-      break;
-    case 3:
-      // Serial.println(">Flight Mode: 3");
-      leds[1] = CRGB::Black; // LED 2 off
-      leds[2] = CRGB::Black; // LED 3 off
-      leds[3] = CRGB::Blue;
-      FastLED.show();
-      break;
-  }
 }
 
 void changeFlightMode() {
@@ -129,7 +52,7 @@ void changeFlightMode() {
   }
   lastChangeTime = currentTime; // Update the last change time
   flightMode = flightMode % 3 + 1; // Cycles through 1, 2, 3 and wraps around
-  updateLEDs();
+  led.updateLEDs(deviceState, flightMode);
   Serial.println("save");
 }
 
@@ -139,7 +62,7 @@ void nonBlockingButtonCheck() {
   // Serial.print("Button state: "); Serial.println(buttonState ? "HIGH" : "LOW");
 
   // if the button is being pressed, and the timer is not running, start the timer
-  if (buttonState == LOW ) {
+  if (buttonState == LOW) {
     Serial.println("Button is pressed.");
     if (buttonPressTime == 0){
       buttonPressTime = millis();
@@ -155,7 +78,7 @@ void nonBlockingButtonCheck() {
       // update the led strip based on the percentage of time the button has been pressed
       int percentage = (millis() - buttonPressTime) * 100 / LONG_PRESS_TIME;
       Serial.print("Button hold percentage: "); Serial.println(percentage);
-      animatePowerOn(percentage);
+      led.animatePowerOn(percentage, deviceState);
     }
   }
   // else, if the button is not pressed, reset the timer to 0
@@ -167,20 +90,14 @@ void nonBlockingButtonCheck() {
   }
 
   lastButtonState = buttonState;
-
 }
 
 
 void setup() {
   // Setup Serial
   Serial.begin(115200);
-  // while (!Serial); delay(10);
-
-  Serial.println("Adafruit LIS3MDL test!");
-
-  // Setup LEDs
-  FastLED.addLeds<NEOPIXEL, LED_DATA_OUT_PIN>(leds, NUM_LEDS);
-  updateLEDs();
+  led.setup();
+  led.updateLEDs(deviceState, flightMode);
 
   // Setup Buttons
   pinMode(MENU_BUTTON_PIN, INPUT_PULLUP); // Set the button pin as input with pull-up
@@ -199,7 +116,7 @@ void setup() {
 
 void loop() {
   nonBlockingButtonCheck();
-  updateLEDs();
+  led.updateLEDs(deviceState, flightMode);
 
   if (!deviceState) {
     Serial.println("Device is powered off.");
@@ -259,5 +176,4 @@ void loop() {
   // animatePowerOn(throttle);
 
   delay(50);
-
 }
