@@ -1,4 +1,4 @@
-name: 3D files
+name: 3D files CI
 
 on: [push, pull_request]
 

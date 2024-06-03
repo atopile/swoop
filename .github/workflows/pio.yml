@@ -1,4 +1,4 @@
-name: PlatformIO CI
+name: PlatformIO firmware CI
 
 on: [push]
 
@@ -22,3 +22,10 @@ jobs:
 
       - name: Build PlatformIO Project
         run: pio run
+
+      - name: Upload Build Artifacts for Debug Environment
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-debug
+          path: .pio/build/debug/firmware.*
