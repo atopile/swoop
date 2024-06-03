@@ -23,7 +23,7 @@ jobs:
     - name: Search for STEP files and move to artifacts
       run: |
         mkdir -p 3D_files
-        find ./mech -type f \( -name "*.step" -o -name "*.stp" \) -exec mv {} 3D_files/ \;
+        find ./mech -type f \( -name "*.step" -o -name "*.stp" -o -name "*.stl" -o -name "*.dxf" \) -exec mv {} 3D_files/ \;
 
     - name: List files in 3D_files directory for debugging
       run: |
