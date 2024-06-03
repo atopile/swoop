@@ -1,4 +1,4 @@
-name: atopile CI
+name: atopile electronics CI
 
 on:
   push:
