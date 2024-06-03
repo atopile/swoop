@@ -26,8 +26,7 @@ With swoop, you can fly remote controlled aircraft with the motion of your hand.
 
 ## Open Source Hardware..?
 
-This project is fully open source. But one might ask, how can it be open source if "source code" doesn't exist for hardware? At least, not in the same way that it exists in software with languages like C, Python or Rust?
-Well, that's why we are designing this remote with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics.
+This project is fully open source and designed with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics.
 With atopile, we can version control the hardware alongside the firmware, make issues and pull requests, run continuous integration to generate manufacturing files automatically and reuse section of our design. This is true Open Source Hardware!
 
 ## Here is how it works:
