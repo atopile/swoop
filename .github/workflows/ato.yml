@@ -24,7 +24,7 @@ jobs:
 
       - name: Zip 3D files and CSVs
         run: |
-          zip -r artifacts/electronics_build_artifacts.zip build/*.zip build/*.csv
+          zip -r artifact/electronics_build_artifacts.zip build/*.zip build/*.csv
 
       - name: Configure AWS Credentials
         if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
@@ -37,4 +37,4 @@ jobs:
       - name: Sync artifacts to S3
         if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
         run: |
-          aws s3 sync artifacts s3://atopile/swoop/electronics --delete --cache-control max-age=0,no-cache
+          aws s3 sync artifact s3://atopile/swoop/electronics --delete --cache-control max-age=0,no-cache
