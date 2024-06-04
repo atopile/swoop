@@ -15,20 +15,10 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: List files in mech directory for debugging
-      run: |
-        echo "Listing contents of mech directory:"
-        find ./mech -type f
-
     - name: Search for STEP files and move to artifacts
       run: |
         mkdir -p 3D_files
         find ./mech -type f \( -name "*.step" -o -name "*.stp" -o -name "*.stl" -o -name "*.dxf" \) -exec mv {} 3D_files/ \;
-
-    - name: List files in 3D_files directory for debugging
-      run: |
-        echo "Listing contents of 3D_files directory:"
-        ls -la 3D_files
 
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
@@ -36,3 +26,16 @@ jobs:
         name: 3D_files
         path: 3D_files/
         if-no-files-found: warn
+
+    - name: Configure AWS Credentials
+        if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Sync artifacts to S3
+        if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
+        run: |
+          aws s3 sync 3D_files s3://atopile/swoop/mechanics --delete --cache-control max-age=0,no-cache
