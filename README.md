@@ -36,6 +36,10 @@ This project is fully open source and designed with [atopile](https://github.com
 
 [3D Files (STL, STEP files in the future)](https://atopile.s3.amazonaws.com/swoop/mechanics/3D_files.zip)
 
+**Atopile code**
+
+The atopile entry point is located [here](https://github.com/atopile/swoop/blob/main/elec/src/swoop.ato). Clone the repository and [install atopile](https://atopile.io/getting-started/) if you'd like to explore further.
+
 ## Here is how it works:
 
 The three rotation axis, yaw, pitch, roll of the remote each control the same channel on your aircraft. If you tilt your remote to a certain angle, your aircraft will rotate in that same direction with a certain rotational speed. That's what makes this controller so intuitive to use!
