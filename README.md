@@ -24,10 +24,19 @@
 
 With swoop, you can fly remote controlled aircraft with the motion of your hand. It's especially fun when flying FPV because the motion of your remote precisely maps to the aircraft.
 
-## Open Source Hardware..?
+## Build your own controller
 
-This project is fully open source and designed with [atopile](https://github.com/atopile/atopile), a new language and compiler for electronics.
-With atopile, we can version control the hardware alongside the firmware, make issues and pull requests, run continuous integration to generate manufacturing files automatically and reuse section of our design. This is true Open Source Hardware!
+This project is fully open source and designed with [atopile](https://github.com/atopile/atopile), a new language and compiler to design electronics with code.
+
+**Latest auto-generated artifacts**
+
+[Electronics: Gerbers, Bill of material, position files](https://atopile.s3.amazonaws.com/swoop/electronics/electronics_build_artifacts.zip)
+
+[Firmware](https://atopile.s3.amazonaws.com/swoop/firmware/firmware_build_artifacts.zip)
+
+[3D Files (STL, STEP files in the future)](https://atopile.s3.amazonaws.com/swoop/mechanics/3D_files.zip)
+
+[3D stl files] (will add step files in the future)
 
 ## Here is how it works:
 
