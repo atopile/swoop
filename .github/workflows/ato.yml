@@ -17,7 +17,20 @@ jobs:
         uses: docker://ghcr.io/atopile/atopile-kicad
 
       - name: Upload Combined Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: build
+
+      - name: Configure AWS Credentials
+        if: github.event_name == 'push'  && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Sync artifacts to S3
+        if: github.event_name == 'push'  && github.ref == 'refs/heads/main'
+        run: |
+          aws s3 sync build s3://atopile/swoop/electronics --delete --cache-control max-age=0,no-cache

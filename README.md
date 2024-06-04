@@ -13,10 +13,10 @@
         <img src="https://img.shields.io/github/actions/workflow/status/atopile/swoop/3d.yml?label=3D%20files" alt="3D files" style="vertical-align:top; margin:6px 4px">
     </a>
     <a href="#">
-        <img src="https://img.shields.io/github/license/atopile/swoop" alt="Build status" style="vertical-align:top; margin:6px 4px">
+        <img src="https://img.shields.io/github/license/atopile/swoop" alt="License" style="vertical-align:top; margin:6px 4px">
     </a>
     <a href="#">
-        <img src="https://img.shields.io/github/v/release/atopile/swoop" alt="Build status" style="vertical-align:top; margin:6px 4px">
+        <img src="https://img.shields.io/github/v/release/atopile/swoop" alt="Release" style="vertical-align:top; margin:6px 4px">
     </a>
 </div>
 
