@@ -25,10 +25,15 @@ jobs:
 
       - name: Upload Build Artifacts for Debug Environment
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: firmware-debug
           path: .pio/build/debug/firmware.*
+
+      - name: Zip 3D files and CSVs
+        run: |
+          mkdir -p artifacts
+          zip -r artifacts/firmware_build_artifacts.zip firmware-debug
 
       - name: Configure AWS Credentials
         if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
@@ -41,4 +46,4 @@ jobs:
       - name: Sync artifacts to S3
         if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
         run: |
-          aws s3 sync firmware-debug s3://atopile/swoop/firmware --delete --cache-control max-age=0,no-cache
+          aws s3 sync artifacts s3://atopile/swoop/firmware --delete --cache-control max-age=0,no-cache
