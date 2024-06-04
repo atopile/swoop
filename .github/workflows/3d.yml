@@ -20,11 +20,15 @@ jobs:
         mkdir -p 3D_files
         find ./mech -type f \( -name "*.step" -o -name "*.stp" -o -name "*.stl" -o -name "*.dxf" \) -exec mv {} 3D_files/ \;
 
+    - name: Zip 3D files
+      run: |
+        zip -r 3D_files.zip 3D_files
+
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: 3D_files
-        path: 3D_files/
+        path: 3D_files.zip
         if-no-files-found: warn
 
     - name: Configure AWS Credentials
@@ -38,4 +42,4 @@ jobs:
     - name: Sync artifacts to S3
       if: github.event_name == 'push' #&& github.ref == 'refs/heads/main'
       run: |
-        aws s3 sync 3D_files s3://atopile/swoop/mechanics --delete --cache-control max-age=0,no-cache
+        aws s3 sync 3D_files.zip s3://atopile/swoop/mechanics --delete --cache-control max-age=0,no-cache
