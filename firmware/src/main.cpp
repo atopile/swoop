@@ -25,6 +25,7 @@ Adafruit_DRV2605 haptic;
 SF fusion;
 
 LED led;
+RotationMath rotation_math;
 
 // Variables
 float gx, gy, gz, ax, ay, az, mx, my, mz;
@@ -143,6 +144,7 @@ void loop() {
   throttle = getThrottle();
 
   float* quat = fusion.getQuat();
+  matrix::Eulerf control_angles = rotation_math.getControlAngles(matrix::Quatf(quat));
   // Serial.print(">dt:");
   // Serial.println(deltat);
   // Serial.print(">gx:");
@@ -174,6 +176,14 @@ void loop() {
   Serial.println(quat[2]);
   Serial.print(">z:");
   Serial.println(quat[3]);
+
+  Serial.print("Roll: ");
+  Serial.print(degrees(control_angles(0)));
+  Serial.print(" Pitch: ");
+  Serial.print(degrees(control_angles(1)));
+  Serial.print(" Yaw: ");
+  Serial.print(degrees(control_angles(2)));
+  Serial.println("");
 
   // animatePowerOn(throttle);
 
