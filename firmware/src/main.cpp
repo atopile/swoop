@@ -1,3 +1,5 @@
+#include "../lib/RotationMath/RotationMath.hpp"
+
 #include <Arduino.h>
 #include "main.h"
 #include <Wire.h>
