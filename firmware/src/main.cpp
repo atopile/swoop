@@ -57,6 +57,9 @@ void changeFlightMode() {
   flightMode = flightMode % 3 + 1; // Cycles through 1, 2, 3 and wraps around
   led.updateLEDs(deviceState, flightMode);
   Serial.println("save");
+
+  float* quat = fusion.getQuat();
+  rotation_math.setZeroQuaternion(matrix::Quatf(fusion.getQuat()));
 }
 
 void nonBlockingButtonCheck() {
@@ -168,21 +171,21 @@ void loop() {
   // Serial.print(">Throttle:\t"); Serial.println(throttle);
   // Serial.println();
   // print the quaternion
-  Serial.print(">w:");
-  Serial.println(quat[0]);
-  Serial.print(">x:");
-  Serial.println(quat[1]);
-  Serial.print(">y:");
-  Serial.println(quat[2]);
-  Serial.print(">z:");
-  Serial.println(quat[3]);
+  // Serial.print(">w:");
+  // Serial.println(quat[0]);
+  // Serial.print(">x:");
+  // Serial.println(quat[1]);
+  // Serial.print(">y:");
+  // Serial.println(quat[2]);
+  // Serial.print(">z:");
+  // Serial.println(quat[3]);
 
-  Serial.print("Roll: ");
-  Serial.print(degrees(control_angles(0)));
-  Serial.print(" Pitch: ");
-  Serial.print(degrees(control_angles(1)));
-  Serial.print(" Yaw: ");
-  Serial.print(degrees(control_angles(2)));
+  Serial.print(">Roll: ");
+  Serial.println(degrees(control_angles(0)));
+  Serial.print(">Pitch: ");
+  Serial.println(degrees(control_angles(1)));
+  Serial.print(">Yaw: ");
+  Serial.println(degrees(control_angles(2)));
   Serial.println("");
 
   // animatePowerOn(throttle);
