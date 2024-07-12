@@ -28,13 +28,13 @@ matrix::Eulerf RotationMath::quaternionToControlAngles(matrix::Quatf q) {
 
     // Pitch extraction
     // using euler angles order zyx and using z as pitch
-    float r11 = 2.f * ((q(3) * q(1)) + (q(0) * q(2)));
-    float r12 = (q(0) * q(0)) + (q(3) * q(3)) - (q(1) * q(1)) - (q(2) * q(2));
+    float r11 = 2.f * ((q(1) * q(2)) + (q(0) * q(3)));
+    float r12 = (q(0) * q(0)) + (q(1) * q(1)) - (q(2) * q(2)) - (q(3) * q(3));
     float pitch = atan2f(r11, r12);
 
     // Roll extraction
     // using euler angles order yzx and using y as roll
-    r11 = -2.f * ((q(0) * q(1)) - (q(0) * q(1)));
+    r11 = -2.f * ((q(1) * q(3)) - (q(0) * q(2)));
     float roll = atan2f(r11, r12);
 
     return Eulerf(roll, pitch, yaw);

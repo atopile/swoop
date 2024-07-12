@@ -25,7 +25,8 @@ private:
     // Using the Euler angles of multiple axis rotations (degrees) (XYZ order)
     // x = -90deg; y = 90deg; z = 23deg; #TODO: confirm the 23 deg
     // Result: Quaternion [x, y, z, w] [ -0.3902784, 0.5896463, -0.3902784, 0.5896463 ]
-    const matrix::Quatf Q_SENSOR_OFFSET{0.5896463, -0.3902784, 0.5896463, -0.3902784};
+    //const matrix::Quatf Q_SENSOR_OFFSET{0.5896463, -0.3902784, 0.5896463, -0.3902784};
+    const matrix::Quatf Q_SENSOR_OFFSET{0, 0, 0, 1};
 
     matrix::Quatf _q_zero{}; ///< attitude of remote when armed
 };
