@@ -11,6 +11,9 @@
 
 #include "../lib/LED/LED.hpp"
 
+#include "../lib/RCMapper/rcmapper.hpp"
+#include "../lib/PPM/PPMController.hpp"
+
 // constants
 #define LONG_PRESS_TIME 2000 // Long press duration in milliseconds
 
@@ -26,6 +29,8 @@ SF fusion;
 
 LED led;
 RotationMath rotation_math;
+
+PPMController ppm_controller;
 
 // Variables
 float gx, gy, gz, ax, ay, az, mx, my, mz;
@@ -118,6 +123,8 @@ void setup() {
 
   mag.begin_I2C(LIS3MDLTR_ADDRESS, &Wire);
   mpu.begin(MPU6050_ADDRESS, &Wire);
+
+  ppm_controller.initialize(PPM_PIN);
 }
 
 void loop() {
@@ -180,15 +187,38 @@ void loop() {
   // Serial.print(">z:");
   // Serial.println(quat[3]);
 
-  Serial.print(">Roll: ");
-  Serial.println(degrees(control_angles(0)));
-  Serial.print(">Pitch: ");
-  Serial.println(degrees(control_angles(1)));
-  Serial.print(">Yaw: ");
-  Serial.println(degrees(control_angles(2)));
-  Serial.println("");
+  // Serial.print(">Roll: ");
+  // Serial.println(degrees(control_angles(0)));
+  // Serial.print(">Pitch: ");
+  // Serial.println(degrees(control_angles(1)));
+  // Serial.print(">Yaw: ");
+  // Serial.println(degrees(control_angles(2)));
+  // Serial.println("");
 
-  // animatePowerOn(throttle);
+  RCMapper mapper;
 
-  delay(50);
+  // Create a test input frame
+  inputFrameControlSignals input_frame;
+  input_frame.control_angles = control_angles;
+  input_frame.throttle = 1000; // Example throttle value
+  input_frame.additional_channels[0] = 1000;
+  input_frame.additional_channels[1] = 1000;
+  input_frame.additional_channels[2] = 1000;
+  input_frame.additional_channels[3] = 1000;
+
+  // Map values using the mapper
+  ControlSignals output_signals = mapper.mapValues(input_frame);
+
+  ppm_controller.setPPMValues(output_signals);
+
+  Serial.print("Yaw: ");
+  Serial.println(output_signals.yaw);
+  Serial.print("Pitch: ");
+  Serial.println(output_signals.pitch);
+  Serial.print("Roll: ");
+  Serial.println(output_signals.roll);
+  Serial.print("Throttle: ");
+  Serial.println(output_signals.throttle);
+
+  delay(100);
 }

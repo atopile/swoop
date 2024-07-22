@@ -12,6 +12,7 @@
 #define MENU_BUTTON_PIN 12
 #define HALL_SENSOR_PIN 26
 #define CHARGE_STATUS_PIN 17
+#define PPM_PIN 4
 
 // I2C Addresses
 #define BNO055_ADDRESS 0x28
